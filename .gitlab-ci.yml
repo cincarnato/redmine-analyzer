@@ -4,7 +4,7 @@ include:
 
 variables:
   SAST_DEFAULT_ANALYZERS: "semgrep"
-  DOCKER_REPO: "sndregistry.sondeosglobal.com/redmine-analyzer/redmine-analyzer"
+  DOCKER_REPO: "sndregistry.sondeosglobal.com/redmine-analyzer"
   VERSION_REPO: ${CI_COMMIT_TAG}
 
 stages:
