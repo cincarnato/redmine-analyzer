@@ -19,6 +19,9 @@ import {AIRoutes, AILogRoutes} from "@drax/ai-back";
 import {GoogleFastifyRoutes} from "../modules/google/routes/GoogleRoutes.js"
 import {HealthRoutes} from "../modules/base/routes/HealthRoutes.js"
 import {NotificationFastifyRoutes} from "../modules/base/routes/NotificationRoutes.js"
+import {RedmineIssueAnalysisFastifyRoutes} from "../modules/redmine/routes/RedmineIssueAnalysisRoutes.js"
+import {RedmineIssueFastifyRoutes} from "../modules/redmine/routes/RedmineIssueRoutes.js"
+import {RedmineSyncFastifyRoutes} from "../modules/redmine/routes/RedmineSyncRoutes.js"
 
 function FastifyServerFactory(rootDir:string) {
     const server = new FastifyServer(rootDir);
@@ -50,6 +53,9 @@ function FastifyServerFactory(rootDir:string) {
     server.fastifyRegister(GoogleFastifyRoutes)
     server.fastifyRegister(HealthRoutes)
     server.fastifyRegister(NotificationFastifyRoutes)
+    server.fastifyRegister(RedmineIssueAnalysisFastifyRoutes)
+    server.fastifyRegister(RedmineIssueFastifyRoutes)
+    server.fastifyRegister(RedmineSyncFastifyRoutes)
 
 
 

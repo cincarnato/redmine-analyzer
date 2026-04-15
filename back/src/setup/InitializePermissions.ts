@@ -15,6 +15,8 @@ import {AILogPermissions, AIPermissions} from "@drax/ai-back";
 
 import {BasePermissions} from "../modules/base/permissions/BasePermissions.js";
 import {NotificationPermissions} from "../modules/base/permissions/NotificationPermissions.js";
+import {RedmineIssueAnalysisPermissions} from "../modules/redmine/permissions/RedmineIssueAnalysisPermissions.js";
+import {RedmineIssuePermissions} from "../modules/redmine/permissions/RedmineIssuePermissions.js";
 
 
 function InitializePermissions() {
@@ -38,6 +40,8 @@ function InitializePermissions() {
         //Local modules permissions
         ...Object.values(BasePermissions),
         ...Object.values(NotificationPermissions),
+        ...Object.values(RedmineIssueAnalysisPermissions),
+        ...Object.values(RedmineIssuePermissions),
 
     ]
 
@@ -48,4 +52,3 @@ function InitializePermissions() {
 export default InitializePermissions
 
 export {InitializePermissions}
-

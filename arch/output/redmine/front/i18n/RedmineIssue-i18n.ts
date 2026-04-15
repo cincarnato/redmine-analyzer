@@ -1,0 +1,110 @@
+
+const messages = {
+  en: {
+  
+    redmineissue: {
+          entity: 'RedmineIssue',
+          menu: 'RedmineIssue',
+          crud: 'Manage RedmineIssue',
+          field:{
+                       redmineId:'redmineId',
+           subject:'subject',
+           description:'description',
+           doneRatio:'doneRatio',
+           isPrivate:'isPrivate',
+           spentHours:'spentHours',
+           totalSpentHours:'totalSpentHours',
+           estimatedHours:'estimatedHours',
+           totalEstimatedHours:'totalEstimatedHours',
+           startDate:'startDate',
+           dueDate:'dueDate',
+           createdOn:'createdOn',
+           updatedOn:'updatedOn',
+           closedOn:'closedOn',
+           project:'project',
+           id: 'id',
+           name: 'name',
+           tracker:'tracker',
+           id: 'id',
+           name: 'name',
+           status:'status',
+           id: 'id',
+           name: 'name',
+           isClosed: 'isClosed',
+           priority:'priority',
+           id: 'id',
+           name: 'name',
+           author:'author',
+           id: 'id',
+           name: 'name',
+           customFields:'customFields',
+           id: 'id',
+           name: 'name',
+           value: 'value',
+           syncSource:'syncSource',
+           rawPayload:'rawPayload'
+          }
+      },
+      permission: {
+              'redmineissue:view': 'View RedmineIssue',
+              'redmineissue:create': 'Create RedmineIssue',
+              'redmineissue:update': 'Edit RedmineIssue',
+              'redmineissue:delete': 'Delete RedmineIssue',
+              'redmineissue:manage': 'Manage RedmineIssue',
+      }
+  },
+  es: {
+     redmineissue: {
+          entity: 'RedmineIssue',
+          menu: 'RedmineIssue',
+          crud: 'Gestionar RedmineIssue',
+          field:{
+                       redmineId:'redmineId',
+           subject:'subject',
+           description:'description',
+           doneRatio:'doneRatio',
+           isPrivate:'isPrivate',
+           spentHours:'spentHours',
+           totalSpentHours:'totalSpentHours',
+           estimatedHours:'estimatedHours',
+           totalEstimatedHours:'totalEstimatedHours',
+           startDate:'startDate',
+           dueDate:'dueDate',
+           createdOn:'createdOn',
+           updatedOn:'updatedOn',
+           closedOn:'closedOn',
+           project:'project',
+           id: 'id',
+           name: 'name',
+           tracker:'tracker',
+           id: 'id',
+           name: 'name',
+           status:'status',
+           id: 'id',
+           name: 'name',
+           isClosed: 'isClosed',
+           priority:'priority',
+           id: 'id',
+           name: 'name',
+           author:'author',
+           id: 'id',
+           name: 'name',
+           customFields:'customFields',
+           id: 'id',
+           name: 'name',
+           value: 'value',
+           syncSource:'syncSource',
+           rawPayload:'rawPayload'
+          }
+      },
+     permission: {
+              'redmineissue:view': 'Ver RedmineIssue',
+              'redmineissue:create': 'Crear RedmineIssue',
+              'redmineissue:update': 'Editar RedmineIssue',
+              'redmineissue:delete': 'Eliminar RedmineIssue',
+              'redmineissue:manage': 'Gestionar RedmineIssue',
+     }
+  }
+}
+
+export default messages;  

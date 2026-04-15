@@ -10,6 +10,42 @@ const menu: MenuItem[] = [
   },
   {
     icon: 'mdi-account-circle',
+    text: 'REDMINE',
+    gallery: true,
+    permission: 'user:manage',
+    children: [
+      {
+        icon: 'mdi-file-document-search',
+        text: 'redmineissueanalysis.menu',
+        link: { name: "RedmineIssueAnalysisCrudPage" },
+        gallery: true,
+        permission: 'redmineissueanalysis:manage'
+      },
+      {
+        icon: 'mdi-robot-outline',
+        text: 'redmineissueanalysis.runMenu',
+        link: { name: "RedmineIssueAnalysisRunPage" },
+        gallery: true,
+        permission: 'redmineissueanalysis:manage'
+      },
+      {
+        icon: 'mdi-bug',
+        text: 'redmineissue.menu',
+        link: { name: "RedmineIssueCrudPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      },
+      {
+        icon: 'mdi-sync',
+        text: 'redmineissue.syncMenu',
+        link: { name: "RedmineIssueSyncPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      }
+    ]
+  },
+  {
+    icon: 'mdi-account-circle',
     text:'admin',
     gallery: true,
     permission: 'user:manage',
@@ -122,7 +158,8 @@ const menu: MenuItem[] = [
         auth: true
       },
     ]
-  }
+  },
+
 ]
 
 export default menu
@@ -130,5 +167,3 @@ export default menu
 export {
   menu
 }
-
-

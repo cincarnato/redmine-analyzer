@@ -1,0 +1,188 @@
+import { IEntitySchema } from "@drax/arch";
+
+const schema: IEntitySchema = {
+    module: "redmine",
+    name: "RedmineIssue",
+    identifier: "redmineId",
+    apiBasePath: "redmine-issues",
+    collectionName: "redmineissues",
+    apiTag: "redmine",
+    tabs: ["General", "Dates", "Relations", "Custom Fields", "Sync"],
+    schema: {
+        redmineId: {
+            type: "number",
+            required: true,
+            unique: true,
+            index: true,
+            search: true,
+            header: true,
+            groupTab: "General",
+        },
+        subject: {
+            type: "string",
+            required: true,
+            index: true,
+            search: true,
+            header: true,
+            groupTab: "General",
+        },
+        description: {
+            type: "longString",
+            required: false,
+            search: true,
+            header: false,
+            groupTab: "General",
+        },
+        doneRatio: {
+            type: "number",
+            required: false,
+            default: 0,
+            header: true,
+            groupTab: "General",
+        },
+        isPrivate: {
+            type: "boolean",
+            required: false,
+            default: false,
+            header: true,
+            groupTab: "General",
+        },
+        spentHours: {
+            type: "number",
+            required: false,
+            default: 0,
+            header: true,
+            groupTab: "General",
+        },
+        totalSpentHours: {
+            type: "number",
+            required: false,
+            default: 0,
+            header: false,
+            groupTab: "General",
+        },
+        estimatedHours: {
+            type: "number",
+            required: false,
+            header: false,
+            groupTab: "General",
+        },
+        totalEstimatedHours: {
+            type: "number",
+            required: false,
+            header: false,
+            groupTab: "General",
+        },
+        startDate: {
+            type: "date",
+            required: false,
+            header: true,
+            groupTab: "Dates",
+        },
+        dueDate: {
+            type: "date",
+            required: false,
+            header: true,
+            groupTab: "Dates",
+        },
+        createdOn: {
+            type: "date",
+            required: true,
+            index: true,
+            header: true,
+            groupTab: "Dates",
+        },
+        updatedOn: {
+            type: "date",
+            required: true,
+            index: true,
+            header: true,
+            groupTab: "Dates",
+        },
+        closedOn: {
+            type: "date",
+            required: false,
+            header: true,
+            groupTab: "Dates",
+        },
+        project: {
+            type: "object",
+            required: true,
+            header: true,
+            groupTab: "Relations",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+            },
+        },
+        tracker: {
+            type: "object",
+            required: true,
+            header: true,
+            groupTab: "Relations",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+            },
+        },
+        status: {
+            type: "object",
+            required: true,
+            header: true,
+            groupTab: "Relations",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+                isClosed: { type: "boolean", required: false, default: false },
+            },
+        },
+        priority: {
+            type: "object",
+            required: true,
+            header: true,
+            groupTab: "Relations",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+            },
+        },
+        author: {
+            type: "object",
+            required: true,
+            header: true,
+            groupTab: "Relations",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+            },
+        },
+        customFields: {
+            type: "array.object",
+            required: false,
+            header: false,
+            groupTab: "Custom Fields",
+            schema: {
+                id: { type: "number", required: true, index: true },
+                name: { type: "string", required: true, search: true },
+                value: { type: "string", required: false, search: true },
+            },
+        },
+        syncSource: {
+            type: "string",
+            required: false,
+            default: "redmine",
+            header: false,
+            groupTab: "Sync",
+        },
+        rawPayload: {
+            type: "record",
+            required: false,
+            header: false,
+            groupTab: "Sync",
+            schema: {},
+        },
+    },
+};
+
+export default schema;
+export { schema };
