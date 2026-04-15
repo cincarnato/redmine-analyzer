@@ -72,6 +72,8 @@ const RedmineIssueAnalysisPromptSchema = z.object({
     nivelValor: z.enum(['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto']).nullable(),
     nivelComplejidad: z.enum(['muy_baja', 'baja', 'media', 'alta', 'muy_alta']).nullable(),
     nivelUrgencia: z.enum(['muy_baja', 'baja', 'media', 'alta', 'muy_alta']).nullable(),
+    nivelDetectabilidadDesarrollo: z.enum(['muy_baja', 'baja', 'alta', 'muy_alta']).nullable(),
+    tipoTrabajoTecnico: z.enum(['frontend', 'backend', 'fullstack']).nullable(),
     esError: z.boolean().nullable(),
     esRetrabajo: z.boolean().nullable(),
     esCambioMenor: z.boolean().nullable(),
@@ -327,7 +329,7 @@ class RedmineIssueAnalysisController extends AbstractFastifyController<IRedmineI
         const payload: IRedmineIssueAnalysisBase = {
             ...analysis,
             redmineIssue: issue._id,
-            redmineIssueSnapshot: this.buildIssueSnapshot(issue),
+            issue: this.buildIssueSnapshot(issue),
         };
 
         const existing = await this.service.findOne({
@@ -463,6 +465,8 @@ class RedmineIssueAnalysisController extends AbstractFastifyController<IRedmineI
                             "Todos los campos del JSON deben estar presentes.",
                             "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
                             "El campo confianza debe estar entre 0 y 1.",
+                            "nivelDetectabilidadDesarrollo mide que tan evidente o evitable era el error para desarrollo: muy_baja si era muy dificil de detectar sin un caso rebuscado; baja si requeria atencion especial; alta si habia seniales claras; muy_alta si era un error obvio que desarrollo debio detectar.",
+                            "tipoTrabajoTecnico debe inferir si la resolucion principal parece de frontend, backend o fullstack.",
                             "Responde en espanol neutro y sin texto extra.",
                         ].join("\n"),
                         userInput: [

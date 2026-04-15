@@ -3,13 +3,15 @@ import type {IRedmineIssue, IRedmineIssueBase} from "./IRedmineIssue";
 
 interface IRedmineIssueAnalysisBase {
     redmineIssue: any
-    redmineIssueSnapshot?: IRedmineIssueBase
+    issue?: IRedmineIssueBase
     resumen?: string
     categoria?: string
     tipoObjetivo?: string
     nivelValor?: string
     nivelComplejidad?: string
     nivelUrgencia?: string
+    nivelDetectabilidadDesarrollo?: string
+    tipoTrabajoTecnico?: string
     esError?: boolean
     esRetrabajo?: boolean
     esCambioMenor?: boolean
@@ -29,13 +31,15 @@ interface IRedmineIssueAnalysisBase {
 interface IRedmineIssueAnalysis {
     _id: string
     redmineIssue: any
-    redmineIssueSnapshot?: IRedmineIssueBase | IRedmineIssue
+    issue?: IRedmineIssueBase | IRedmineIssue
     resumen?: string
     categoria?: string
     tipoObjetivo?: string
     nivelValor?: string
     nivelComplejidad?: string
     nivelUrgencia?: string
+    nivelDetectabilidadDesarrollo?: string
+    tipoTrabajoTecnico?: string
     esError?: boolean
     esRetrabajo?: boolean
     esCambioMenor?: boolean

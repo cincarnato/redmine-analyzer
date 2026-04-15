@@ -16,13 +16,15 @@ const RedmineIssueSnapshotSchema = new mongoose.Schema(
 
 const RedmineIssueAnalysisSchema = new mongoose.Schema<IRedmineIssueAnalysis>({
             redmineIssue: {type: mongoose.Schema.Types.ObjectId, ref: 'RedmineIssue',  required: true, index: true, unique: true },
-            redmineIssueSnapshot: {type: RedmineIssueSnapshotSchema, required: false },
+            issue: {type: RedmineIssueSnapshotSchema, required: false },
             resumen: {type: String,   required: false, index: false, unique: false },
             categoria: {type: String,  enum: ['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro'], required: false, index: false, unique: false },
             tipoObjetivo: {type: String,  enum: ['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro'], required: false, index: false, unique: false },
             nivelValor: {type: String,  enum: ['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto'], required: false, index: false, unique: false },
             nivelComplejidad: {type: String,  enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta'], required: false, index: false, unique: false },
             nivelUrgencia: {type: String,  enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta'], required: false, index: false, unique: false },
+            nivelDetectabilidadDesarrollo: {type: String,  enum: ['muy_baja', 'baja', 'alta', 'muy_alta'], required: false, index: false, unique: false },
+            tipoTrabajoTecnico: {type: String,  enum: ['frontend', 'backend', 'fullstack'], required: false, index: false, unique: false },
             esError: {type: Boolean,   required: false, index: false, unique: false },
             esRetrabajo: {type: Boolean,   required: false, index: false, unique: false },
             esCambioMenor: {type: Boolean,   required: false, index: false, unique: false },

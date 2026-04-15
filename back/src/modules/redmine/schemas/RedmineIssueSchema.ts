@@ -62,7 +62,9 @@ const RedmineIssueBaseSchema = z.object({
 
 const RedmineIssueSchema = RedmineIssueBaseSchema.extend({
     _id: z.coerce.string().nullish(),
+    createdAt: jsonSafeDateSchema,
+    updatedAt: jsonSafeDateSchema,
 });
 
 export default RedmineIssueSchema;
-export {RedmineIssueSchema, RedmineIssueBaseSchema};
+export {RedmineIssueSchema, RedmineIssueBaseSchema, jsonSafeDateSchema};

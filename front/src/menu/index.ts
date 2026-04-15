@@ -15,25 +15,48 @@ const menu: MenuItem[] = [
     permission: 'user:manage',
     children: [
       {
-        icon: 'mdi-file-document-search',
+        icon: 'mdi-bug',
+        text: 'redmineissue.menu',
+        link: { name: "RedmineIssueCrudPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      },
+      {
+        icon: 'mdi-home-analytics',
         text: 'redmineissueanalysis.menu',
         link: { name: "RedmineIssueAnalysisCrudPage" },
         gallery: true,
         permission: 'redmineissueanalysis:manage'
       },
       {
+        icon: 'mdi-view-dashboard',
+        text: 'Dashboard Redmine Analysis',
+        link: { name: "RedmineIssueAnalysisDashboardPage" },
+        gallery: true,
+        permission: 'redmineissueanalysis:manage'
+      },
+      {
+        icon: 'mdi-view-dashboard',
+        text: 'Dashboard Redmine Issues',
+        link: { name: "RedmineIssueDashboardPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      },
+    ]
+  },
+  {
+    icon: 'mdi-account-circle',
+    text: 'REDMINE PROCESOS',
+    gallery: true,
+    permission: 'user:manage',
+    children: [
+
+      {
         icon: 'mdi-robot-outline',
         text: 'redmineissueanalysis.runMenu',
         link: { name: "RedmineIssueAnalysisRunPage" },
         gallery: true,
         permission: 'redmineissueanalysis:manage'
-      },
-      {
-        icon: 'mdi-bug',
-        text: 'redmineissue.menu',
-        link: { name: "RedmineIssueCrudPage" },
-        gallery: true,
-        permission: 'redmineissue:manage'
       },
       {
         icon: 'mdi-sync',

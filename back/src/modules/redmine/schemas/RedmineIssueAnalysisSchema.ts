@@ -1,17 +1,19 @@
 
 import { z } from 'zod';
-import {RedmineIssueBaseSchema, RedmineIssueSchema as FullRedmineIssueSchema} from "./RedmineIssueSchema.js";
+import {RedmineIssueBaseSchema, RedmineIssueSchema as FullRedmineIssueSchema, jsonSafeDateSchema} from "./RedmineIssueSchema.js";
 
 
 const RedmineIssueAnalysisBaseSchema = z.object({
     redmineIssue: z.coerce.string().min(1,'validation.required'),
-    redmineIssueSnapshot: RedmineIssueBaseSchema.optional(),
+    issue: RedmineIssueBaseSchema.optional(),
     resumen: z.string().nullish(),
     categoria: z.enum(['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro']).nullish(),
     tipoObjetivo: z.enum(['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro']).nullish(),
     nivelValor: z.enum(['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto']).nullish(),
     nivelComplejidad: z.enum(['muy_baja', 'baja', 'media', 'alta', 'muy_alta']).nullish(),
     nivelUrgencia: z.enum(['muy_baja', 'baja', 'media', 'alta', 'muy_alta']).nullish(),
+    nivelDetectabilidadDesarrollo: z.enum(['muy_baja', 'baja', 'alta', 'muy_alta']).nullish(),
+    tipoTrabajoTecnico: z.enum(['frontend', 'backend', 'fullstack']).nullish(),
     esError: z.boolean().nullish(),
     esRetrabajo: z.boolean().nullish(),
     esCambioMenor: z.boolean().nullish(),
@@ -29,11 +31,13 @@ const RedmineIssueAnalysisBaseSchema = z.object({
 const RedmineIssueAnalysisSchema = RedmineIssueAnalysisBaseSchema
     .extend({
         _id: z.coerce.string(),
+        createdAt: jsonSafeDateSchema,
+        updatedAt: jsonSafeDateSchema,
         redmineIssue: z.union([
             z.coerce.string(),
             z.object({_id: z.coerce.string(), subject: z.string()}),
         ]),
-        redmineIssueSnapshot: RedmineIssueBaseSchema.or(FullRedmineIssueSchema).optional(),
+        issue: RedmineIssueBaseSchema.or(FullRedmineIssueSchema).optional(),
     })
 
 export default RedmineIssueAnalysisSchema;

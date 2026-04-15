@@ -9,13 +9,13 @@ import type {
 } from "../interfaces/IRedmineSync";
 
 class RedmineIssueProvider extends AbstractCrudRestProvider<IRedmineIssue, IRedmineIssueBase, IRedmineIssueBase> {
-    
+
   static singleton: RedmineIssueProvider
-    
+
   constructor() {
    super('/api/redmine-issues')
   }
-  
+
   static get instance() {
     if(!RedmineIssueProvider.singleton){
       RedmineIssueProvider.singleton = new RedmineIssueProvider()
@@ -37,7 +37,7 @@ class RedmineIssueProvider extends AbstractCrudRestProvider<IRedmineIssue, IRedm
 
   async syncIssues(payload: IRedmineIssueSyncPayload): Promise<IRedmineIssueSyncResult> {
     const url = '/api/redmine-sync/issues'
-    const result = await this.httpClient.post(url, payload, {timeout: 120000})
+    const result = await this.httpClient.post(url, payload, {timeout: 360000})
     return result as IRedmineIssueSyncResult
   }
 

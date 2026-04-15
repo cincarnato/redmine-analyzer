@@ -5,7 +5,7 @@ import type{
   IEntityCrud,
   IEntityCrudField,
   IEntityCrudFilter,
-  IEntityCrudHeader, 
+  IEntityCrudHeader,
   IEntityCrudPermissions,
   IEntityCrudRefs,
   IEntityCrudRules
@@ -23,7 +23,7 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
     super();
     this.name = 'RedmineIssue'
   }
-  
+
   static get instance(): RedmineIssueCrud {
     if(!RedmineIssueCrud.singleton){
       RedmineIssueCrud.singleton = new RedmineIssueCrud()
@@ -33,10 +33,10 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
 
   get permissions(): IEntityCrudPermissions{
     return {
-      manage: 'redmineissue:manage', 
-      view: 'redmineissue:view', 
-      create: 'redmineissue:create', 
-      update: 'redmineissue:update', 
+      manage: 'redmineissue:manage',
+      view: 'redmineissue:view',
+      create: 'redmineissue:create',
+      update: 'redmineissue:update',
       delete: 'redmineissue:delete'
     }
   }
@@ -61,11 +61,11 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
 {title: 'fixedVersion',key:'fixedVersion', align: 'start'}
     ]
   }
-  
+
   get selectedHeaders(): string[] {
     return this.headers.map(header => header.key)
   }
-  
+
   get actionHeaders():IEntityCrudHeader[]{
     return [
       {
@@ -82,10 +82,10 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
   get provider(): IDraxCrudProvider<any, any, any>{
     return RedmineIssueProvider.instance
   }
-  
+
   get refs(): IEntityCrudRefs{
     return {
-      
+
     }
   }
 
@@ -151,13 +151,13 @@ customFields: []
 {name:'rawPayload',type:'record',label:'rawPayload',default:null,groupTab: 'Sync'}
     ]
   }
-  
+
   get filters():IEntityCrudFilter[]{
     return [
       //{name: '_id', type: 'string', label: 'ID', default: '', operator: 'eq' },
     ]
   }
-  
+
   get isViewable(){
     return true
   }
@@ -189,7 +189,7 @@ customFields: []
   get isImportable(){
     return false
   }
-  
+
   get isColumnSelectable() {
     return true
   }
@@ -205,21 +205,21 @@ customFields: []
   get dialogFullscreen(){
     return false
   }
-  
+
   get tabs() {
      return [
      'General', 'Dates', 'Relations', 'History', 'Custom Fields', 'Sync'
     ]
   }
-  
+
   get menus() {
     return [
-     
+
     ]
   }
-  
+
   get searchEnable() {
-    return true
+    return false
   }
 
    get filtersEnable(){

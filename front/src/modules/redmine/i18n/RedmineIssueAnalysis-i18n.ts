@@ -1,7 +1,7 @@
 
 const messages = {
   en: {
-  
+
     redmineissueanalysis: {
           entity: 'Issue analysis',
           menu: 'Issue analyses',
@@ -9,6 +9,22 @@ const messages = {
           crud: 'Manage issue analyses',
           field:{
            redmineIssue:'Redmine issue',
+           'redmineId':'Snapshot Redmine ID',
+           'subject':'Snapshot subject',
+           'doneRatio':'Snapshot done ratio',
+           'isPrivate':'Snapshot private',
+           'spentHours':'Snapshot spent hours',
+           'startDate':'Snapshot start date',
+           'dueDate':'Snapshot due date',
+           'createdOn':'Snapshot created on',
+           'updatedOn':'Snapshot updated on',
+           'closedOn':'Snapshot closed on',
+           'project':'Snapshot project',
+           'tracker':'Snapshot tracker',
+           'status':'Snapshot status',
+           'priority':'Snapshot priority',
+           'author':'Snapshot author',
+           'fixedVersion':'Snapshot fixed version',
            resumen:'Summary',
            categoria:'Category',
            tipoObjetivo:'Objective type',
@@ -45,6 +61,22 @@ const messages = {
           crud: 'Gestionar analisis de issues',
           field:{
            redmineIssue:'Issue de Redmine',
+           'redmineId':'ID Redmine',
+           'subject':'Asunto',
+           'doneRatio':'Progreso',
+           'isPrivate':'Privado',
+           'spentHours':'Horas imputadas',
+           'startDate':'Fecha de inicio',
+           'dueDate':'Fecha de vencimiento',
+           'createdOn':'Fecha de creacion',
+           'updatedOn':'Fecha de actualizacion',
+           'closedOn':'Fecha de cierre',
+           'project':'Proyecto',
+           'tracker':'Tracker',
+           'status':'Estado',
+           'priority':'Prioridad',
+           'author':'Autor',
+           'fixedVersion':'Version objetivo',
            resumen:'Resumen',
            categoria:'Categoria',
            tipoObjetivo:'Tipo de objetivo',
@@ -75,4 +107,4 @@ const messages = {
   }
 }
 
-export default messages;  
+export default messages;

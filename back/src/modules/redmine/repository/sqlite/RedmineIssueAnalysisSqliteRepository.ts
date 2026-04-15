@@ -11,7 +11,7 @@ class RedmineIssueAnalysisSqliteRepository extends AbstractSqliteRepository<IRed
     protected dataBaseFile: string;
     protected searchFields: string[] = ['resumen', 'grupoObjetivo', 'areaFuncional'];
     protected booleanFields: string[] = ['esError', 'esRetrabajo', 'esCambioMenor', 'estaBloqueado'];
-    protected jsonFields: string[] = ['redmineIssueSnapshot', 'areasImpacto', 'senialesDesperdicio', 'senialesProceso'];
+    protected jsonFields: string[] = ['issue', 'areasImpacto', 'senialesDesperdicio', 'senialesProceso'];
     protected identifier: string = '_id';
     protected populateFields = [
         { field: 'redmineIssue', table: 'redmineIssue', identifier: '_id' }
@@ -19,7 +19,7 @@ class RedmineIssueAnalysisSqliteRepository extends AbstractSqliteRepository<IRed
     protected verbose: boolean = false;
     protected tableFields: SqliteTableField[] = [
         {name: "redmineIssue", type: "TEXT", unique: undefined, primary: false},
-{name: "redmineIssueSnapshot", type: "TEXT", unique: undefined, primary: false},
+{name: "issue", type: "TEXT", unique: undefined, primary: false},
 {name: "resumen", type: "TEXT", unique: undefined, primary: false},
 {name: "categoria", type: "TEXT", unique: undefined, primary: false},
 {name: "tipoObjetivo", type: "TEXT", unique: undefined, primary: false},

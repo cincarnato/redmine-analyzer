@@ -1,12 +1,16 @@
+import {IRedmineIssueBase, IRedmineIssue} from "@/modules/redmine/interfaces/IRedmineIssue";
 
 interface IRedmineIssueAnalysisBase {
     redmineIssue: any
+    issue?: IRedmineIssueBase
     resumen?: string
     categoria?: string
     tipoObjetivo?: string
     nivelValor?: string
     nivelComplejidad?: string
     nivelUrgencia?: string
+    nivelDetectabilidadDesarrollo?: string
+    tipoTrabajoTecnico?: string
     esError?: boolean
     esRetrabajo?: boolean
     esCambioMenor?: boolean
@@ -26,12 +30,15 @@ interface IRedmineIssueAnalysisBase {
 interface IRedmineIssueAnalysis {
     _id: string
     redmineIssue: any
+    issue?: IRedmineIssue
     resumen?: string
     categoria?: string
     tipoObjetivo?: string
     nivelValor?: string
     nivelComplejidad?: string
     nivelUrgencia?: string
+    nivelDetectabilidadDesarrollo?: string
+    tipoTrabajoTecnico?: string
     esError?: boolean
     esRetrabajo?: boolean
     esCambioMenor?: boolean
@@ -49,6 +56,6 @@ interface IRedmineIssueAnalysis {
 }
 
 export type {
-IRedmineIssueAnalysisBase, 
+IRedmineIssueAnalysisBase,
 IRedmineIssueAnalysis
 }
