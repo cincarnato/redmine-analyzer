@@ -210,8 +210,7 @@ const contextAnalysisItems = computed(() => [
                 sm="6"
               >
                 <v-card
-                  variant="flat"
-                  color="grey-lighten-4"
+                  variant="outlined"
                   class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate compact-metric-card"
                 >
                   <div class="pr-4">
@@ -226,7 +225,7 @@ const contextAnalysisItems = computed(() => [
                 <v-card
                   variant="tonal"
                   color="primary"
-                  class="rounded-lg pa-4 bg-blue-grey-lighten-5 compact-metric-card h-100"
+                  class="rounded-lg pa-4 compact-metric-card h-100"
                 >
                   <div class="metric-label font-weight-bold mb-2 text-primary">Señales</div>
                   <div class="d-flex flex-wrap compact-gap-xs">
@@ -236,7 +235,7 @@ const contextAnalysisItems = computed(() => [
                         :key="senial"
                         color="primary"
                         variant="outlined"
-                        class="font-weight-bold bg-white"
+                        class="font-weight-bold"
                         size="small"
                       >
                         {{ senial }}
@@ -249,8 +248,7 @@ const contextAnalysisItems = computed(() => [
 
               <v-col cols="12" sm="6">
                 <v-card
-                  variant="flat"
-                  color="grey-lighten-4"
+                  variant="outlined"
                   class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card"
                 >
                   <div>
@@ -285,8 +283,7 @@ const contextAnalysisItems = computed(() => [
                 cols="12"
               >
                 <v-card
-                  variant="flat"
-                  color="grey-lighten-4"
+                  variant="outlined"
                   class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate error-analysis-card"
                 >
                   <div class="pr-4">
@@ -397,7 +394,7 @@ const contextAnalysisItems = computed(() => [
 
 .help-option {
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .help-option:last-child {
@@ -454,8 +451,6 @@ const contextAnalysisItems = computed(() => [
 }
 
 .hover-elevate:hover {
-  background-color: rgb(var(--v-theme-surface)) !important;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08) !important;
   transform: translateY(-1px);
 }
 </style>

@@ -143,6 +143,7 @@ onMounted(async () => {
               :items="projects"
               item-title="name"
               item-value="id"
+              :return-object="false"
               label="Proyecto"
               :loading="loadingProjects"
               :disabled="loadingProjects || syncing"

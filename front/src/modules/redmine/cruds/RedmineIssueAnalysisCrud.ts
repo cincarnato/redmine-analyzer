@@ -120,6 +120,136 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         ref: 'RedmineIssue',
         refDisplay: 'subject'
       },
+      {
+        name: 'issue',
+        type: 'object',
+        label: 'issue',
+        default: null,
+        groupTab: 'General',
+        objectFields: [
+          {name: 'redmineId', type: 'number', label: 'redmineId', default: null},
+          {name: 'subject', type: 'string', label: 'subject', default: ''},
+          {name: 'description', type: 'longString', label: 'description', default: ''},
+          {name: 'doneRatio', type: 'number', label: 'doneRatio', default: 0},
+          {name: 'isPrivate', type: 'boolean', label: 'isPrivate', default: false},
+          {name: 'spentHours', type: 'number', label: 'spentHours', default: 0},
+          {name: 'totalSpentHours', type: 'number', label: 'totalSpentHours', default: 0},
+          {name: 'estimatedHours', type: 'number', label: 'estimatedHours', default: null},
+          {name: 'totalEstimatedHours', type: 'number', label: 'totalEstimatedHours', default: null},
+          {name: 'startDate', type: 'date', label: 'startDate', default: null},
+          {name: 'dueDate', type: 'date', label: 'dueDate', default: null},
+          {name: 'createdOn', type: 'date', label: 'createdOn', default: null},
+          {name: 'updatedOn', type: 'date', label: 'updatedOn', default: null},
+          {name: 'closedOn', type: 'date', label: 'closedOn', default: null},
+          {
+            name: 'project',
+            type: 'object',
+            label: 'project',
+            default: {id: null, name: ''},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''}
+            ]
+          },
+          {
+            name: 'tracker',
+            type: 'object',
+            label: 'tracker',
+            default: {id: null, name: ''},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''}
+            ]
+          },
+          {
+            name: 'status',
+            type: 'object',
+            label: 'status',
+            default: {id: null, name: '', isClosed: false},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''},
+              {name: 'isClosed', type: 'boolean', label: 'isClosed', default: false}
+            ]
+          },
+          {
+            name: 'priority',
+            type: 'object',
+            label: 'priority',
+            default: {id: null, name: ''},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''}
+            ]
+          },
+          {
+            name: 'author',
+            type: 'object',
+            label: 'author',
+            default: {id: null, name: ''},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''}
+            ]
+          },
+          {
+            name: 'fixedVersion',
+            type: 'object',
+            label: 'fixedVersion',
+            default: {id: null, name: ''},
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''}
+            ]
+          },
+          {
+            name: 'journals',
+            type: 'array.object',
+            label: 'journals',
+            default: [],
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {
+                name: 'user',
+                type: 'object',
+                label: 'user',
+                default: {id: null, name: ''},
+                objectFields: [
+                  {name: 'id', type: 'number', label: 'id', default: null},
+                  {name: 'name', type: 'string', label: 'name', default: ''}
+                ]
+              },
+              {name: 'notes', type: 'longString', label: 'notes', default: ''},
+              {name: 'createdOn', type: 'date', label: 'createdOn', default: null},
+              {
+                name: 'details',
+                type: 'array.object',
+                label: 'details',
+                default: [],
+                objectFields: [
+                  {name: 'property', type: 'string', label: 'property', default: ''},
+                  {name: 'name', type: 'string', label: 'name', default: ''},
+                  {name: 'oldValue', type: 'string', label: 'oldValue', default: ''},
+                  {name: 'newValue', type: 'string', label: 'newValue', default: ''}
+                ]
+              }
+            ]
+          },
+          {
+            name: 'customFields',
+            type: 'array.object',
+            label: 'customFields',
+            default: [],
+            objectFields: [
+              {name: 'id', type: 'number', label: 'id', default: null},
+              {name: 'name', type: 'string', label: 'name', default: ''},
+              {name: 'value', type: 'string', label: 'value', default: ''}
+            ]
+          },
+          {name: 'syncSource', type: 'string', label: 'syncSource', default: 'redmine'},
+          {name: 'rawPayload', type: 'record', label: 'rawPayload', default: null}
+        ]
+      },
       {name: 'resumen', type: 'longString', label: 'resumen', default: '', groupTab: 'General'},
       {
         name: 'categoria',
@@ -216,8 +346,8 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
 
   get filters(): IEntityCrudFilter[] {
     return [
-      {name: 'issue.closedOn', type: 'date', label: 'Cerrado Desde', default: '', operator: 'gte' },
-      {name: 'issue.closedOn', type: 'date', label: 'Cerrado Hasta', default: '', operator: 'lte' },
+      // {name: 'issue.closedOn', type: 'date', label: 'Cerrado Desde', default: '', operator: 'gte' },
+      // {name: 'issue.closedOn', type: 'date', label: 'Cerrado Hasta', default: '', operator: 'lte' },
     ]
   }
 

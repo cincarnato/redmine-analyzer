@@ -189,30 +189,32 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
           </div>
         </div>
 
-        <div class="mt-4 mt-lg-0 progress-panel">
-          <v-progress-circular
-            :model-value="redmineIssue.doneRatio || 0"
-            :size="66"
-            :width="6"
-            :color="progressColor"
-          >
-            <span class="text-body-1 font-weight-black">{{ redmineIssue.doneRatio || 0 }}%</span>
-          </v-progress-circular>
-          <span class="metric-label mt-2">Progreso</span>
-        </div>
+        <v-card variant="outlined" class="mt-4 mt-lg-0 progress-panel rounded-lg">
+          <v-card-text class="pa-3 d-flex flex-column align-center">
+            <v-progress-circular
+              :model-value="redmineIssue.doneRatio || 0"
+              :size="66"
+              :width="6"
+              :color="progressColor"
+            >
+              <span class="text-body-1 font-weight-black">{{ redmineIssue.doneRatio || 0 }}%</span>
+            </v-progress-circular>
+            <span class="metric-label mt-2">Progreso</span>
+          </v-card-text>
+        </v-card>
       </v-card-text>
     </v-card>
 
     <v-row dense class="compact-row">
       <v-col cols="12" lg="8">
-        <v-card variant="flat" color="grey-lighten-4" class="rounded-lg pa-4 mb-4 compact-card">
+        <v-card variant="outlined" class="rounded-lg pa-4 mb-4 compact-card">
           <div class="section-title mb-2">Descripción</div>
           <div class="description-text text-body-2">
             {{ redmineIssue.description || 'Sin descripción provista.' }}
           </div>
         </v-card>
 
-        <v-card variant="flat" color="grey-lighten-4" class="rounded-lg pa-4 compact-card">
+        <v-card variant="outlined" class="rounded-lg pa-4 compact-card">
           <div class="d-flex justify-space-between align-center mb-3">
             <div class="section-title">Relaciones</div>
             <span class="text-caption text-medium-emphasis">{{ relations.length }} enlaces</span>
@@ -322,8 +324,7 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
 
         <v-card
           v-if="redmineIssue.customFields?.length"
-          variant="flat"
-          color="blue-grey-lighten-5"
+          variant="outlined"
           class="rounded-lg pa-4 compact-card"
         >
           <div class="section-title mb-3">Campos personalizados</div>
@@ -403,13 +404,7 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
 
 .progress-panel {
   min-width: 98px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   align-self: flex-start;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgb(var(--v-theme-surface-variant));
 }
 
 .description-text {
@@ -442,7 +437,6 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
 }
 
 .detail-name {
-  color: rgba(var(--v-theme-on-surface), 0.72);
   font-weight: 700;
 }
 
@@ -466,7 +460,6 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
 .dense-field {
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgb(var(--v-theme-surface));
 }
 
 @media (max-width: 959px) {
