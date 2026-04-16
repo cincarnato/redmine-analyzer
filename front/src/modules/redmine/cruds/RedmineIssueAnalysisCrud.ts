@@ -346,8 +346,14 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
 
   get filters(): IEntityCrudFilter[] {
     return [
-      // {name: 'issue.closedOn', type: 'date', label: 'Cerrado Desde', default: '', operator: 'gte' },
-      // {name: 'issue.closedOn', type: 'date', label: 'Cerrado Hasta', default: '', operator: 'lte' },
+      {name: 'issue.project.name', type: 'string', label: 'Proyecto', default: '', operator: 'like' },
+      {name: 'issue.tracker.name', type: 'string', label: 'Tipo Ticket', default: '', operator: 'like' },
+      {name: 'issue.createdOn', type: 'date', label: 'Creado Desde', default: '', operator: 'gte' },
+      {name: 'issue.createdOn', type: 'date', label: 'Creado Hasta', default: '', operator: 'lte' },
+      {name: 'issue.redmineId', type: 'string', label: 'Redmine ID', default: '', operator: 'eq' },
+      {name: 'issue.fixedVersion.name', type: 'string', label: 'Sprint', default: '', operator: 'like' },
+      {name: 'issue.closedOn', type: 'date', label: 'Cerrado Desde', default: '', operator: 'gte' },
+      {name: 'issue.closedOn', type: 'date', label: 'Cerrado Hasta', default: '', operator: 'lte' },
     ]
   }
 
