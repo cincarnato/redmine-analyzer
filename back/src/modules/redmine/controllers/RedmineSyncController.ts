@@ -32,6 +32,8 @@ interface IRedmineIssueListResponse {
     limit?: number;
 }
 
+type RedmineIssueDateField = "created_on" | "closed_on";
+
 class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRedmineIssueBase, IRedmineIssueBase> {
     private readonly redmineProvider = RedmineProviderFactory.instance;
     private readonly journalFetchBatchSize = 10;
@@ -72,6 +74,10 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
         };
     }
 
+    private resolveDateField(dateField?: string): RedmineIssueDateField {
+        return dateField === "created_on" ? "created_on" : "closed_on";
+    }
+
     private mapIssue(issue: Record<string, any>): IRedmineIssueBase {
         const fixedVersion = this.mapNamedEntity(issue.fixed_version);
         const journals = Array.isArray(issue.journals)
@@ -88,6 +94,15 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
                         newValue: detail.new_value != null ? String(detail.new_value) : undefined,
                     }))
                     : [],
+            }))
+            : [];
+        const relations = Array.isArray(issue.relations)
+            ? issue.relations.map((relation: Record<string, any>) => ({
+                id: relation.id,
+                issueId: relation.issue_id,
+                issueToId: relation.issue_to_id,
+                relationType: relation.relation_type != null ? String(relation.relation_type) : undefined,
+                delay: typeof relation.delay === "number" ? relation.delay : null,
             }))
             : [];
 
@@ -129,6 +144,7 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
             },
             fixedVersion,
             journals,
+            relations,
             customFields: Array.isArray(issue.custom_fields)
                 ? issue.custom_fields.map((customField: Record<string, any>) => ({
                     id: customField.id,
@@ -289,12 +305,14 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
                 projectId?: string | number;
                 dateFrom?: string;
                 dateTo?: string;
+                dateField?: RedmineIssueDateField;
                 statusIds?: Array<string | number>;
                 includeJournals?: boolean;
             };
             const projectId = body.projectId;
             const dateFrom = body.dateFrom;
             const dateTo = body.dateTo;
+            const dateField = this.resolveDateField(body.dateField);
             const statusIds = body.statusIds;
             const includeJournals = body.includeJournals === true;
 
@@ -316,9 +334,10 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
                     offset,
                     limit,
                     status_id: resolvedStatusFilter,
-                    orderBy: "created_on",
-                    created_from: dateFrom,
-                    created_to: dateTo,
+                    orderBy: dateField,
+                    dateField,
+                    date_from: dateFrom,
+                    date_to: dateTo,
                 }) as IRedmineIssueListResponse;
 
                 const pageItems = response.issues ?? [];
@@ -346,6 +365,7 @@ class RedmineSyncController extends AbstractFastifyController<IRedmineIssue, IRe
                 projectId,
                 dateFrom,
                 dateTo,
+                dateField,
                 statusIds: Array.isArray(statusIds) ? statusIds : [],
                 includeJournals,
                 total: issuesToSync.length,

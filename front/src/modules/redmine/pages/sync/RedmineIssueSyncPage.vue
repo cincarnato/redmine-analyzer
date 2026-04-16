@@ -4,7 +4,8 @@ import RedmineIssueProvider from '../../providers/RedmineIssueProvider'
 import type {
   IRedmineIssueSyncResult,
   IRedmineProjectOption,
-  IRedmineStatusOption
+  IRedmineStatusOption,
+  RedmineIssueSyncDateField
 } from '../../interfaces/IRedmineSync'
 
 const provider = RedmineIssueProvider.instance
@@ -17,11 +18,16 @@ const statuses = ref<IRedmineStatusOption[]>([])
 const projectId = ref<number | string | null>(null)
 const dateFrom = ref<string>('')
 const dateTo = ref<string>('')
+const dateField = ref<RedmineIssueSyncDateField>('closed_on')
 const statusIds = ref<Array<number | string>>([])
 const includeJournals = ref(false)
 const errorMsg = ref<string | null>(null)
 const okMsg = ref<string | null>(null)
 const result = ref<IRedmineIssueSyncResult | null>(null)
+const dateFieldOptions: Array<{title: string; value: RedmineIssueSyncDateField}> = [
+  {title: 'Fecha de cierre', value: 'closed_on'},
+  {title: 'Fecha de creación', value: 'created_on'}
+]
 
 const canSubmit = computed(() => {
   return !!projectId.value && !!dateFrom.value && !!dateTo.value && !syncing.value
@@ -84,6 +90,7 @@ async function submit() {
       projectId: projectId.value as string | number,
       dateFrom: dateFrom.value,
       dateTo: dateTo.value,
+      dateField: dateField.value,
       statusIds: statusIds.value,
       includeJournals: includeJournals.value
     })
@@ -110,7 +117,7 @@ onMounted(async () => {
 
       <v-card-text class="d-flex flex-column ga-4">
         <div class="text-medium-emphasis">
-          Selecciona un proyecto, los estados a incluir y un rango de fechas de creación para copiar los tickets desde Redmine al modelo local.
+          Selecciona un proyecto, el tipo de fecha a filtrar, los estados a incluir y un rango para copiar los tickets desde Redmine al modelo local.
         </div>
 
         <v-alert
@@ -140,6 +147,17 @@ onMounted(async () => {
               :loading="loadingProjects"
               :disabled="loadingProjects || syncing"
               clearable
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <v-select
+              v-model="dateField"
+              :items="dateFieldOptions"
+              item-title="title"
+              item-value="value"
+              label="Filtrar por"
+              :disabled="syncing"
             />
           </v-col>
 

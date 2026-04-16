@@ -6,24 +6,18 @@ interface IRedmineIssueAnalysisBase {
     issue?: IRedmineIssueBase
     resumen?: string
     categoria?: string
-    tipoObjetivo?: string
-    nivelValor?: string
-    nivelComplejidad?: string
+    causaError?: string
+    severidadError?: string
+    tipoError?: string
+    objetivo?: string
+    valorNegocio?: string
+    complejidad?: string
     nivelUrgencia?: string
     nivelDetectabilidadDesarrollo?: string
     tipoTrabajoTecnico?: string
-    esError?: boolean
-    esRetrabajo?: boolean
-    esCambioMenor?: boolean
-    estaBloqueado?: boolean
-    motivoRetrabajo?: string
-    areasImpacto?: Array<string>
-    grupoObjetivo?: string
+    rolObjetivo?: string
     areaFuncional?: string
-    resultadoProbable?: string
-    senialesDesperdicio?: Array<string>
-    senialesProceso?: Array<string>
-    confianza?: number
+    seniales?: Array<string>
     createdAt?: Date
     updatedAt?: Date
 }
@@ -34,24 +28,18 @@ interface IRedmineIssueAnalysis {
     issue?: IRedmineIssueBase | IRedmineIssue
     resumen?: string
     categoria?: string
-    tipoObjetivo?: string
-    nivelValor?: string
-    nivelComplejidad?: string
+    causaError?: string
+    severidadError?: string
+    tipoError?: string
+    objetivo?: string
+    valorNegocio?: string
+    complejidad?: string
     nivelUrgencia?: string
     nivelDetectabilidadDesarrollo?: string
     tipoTrabajoTecnico?: string
-    esError?: boolean
-    esRetrabajo?: boolean
-    esCambioMenor?: boolean
-    estaBloqueado?: boolean
-    motivoRetrabajo?: string
-    areasImpacto?: Array<string>
-    grupoObjetivo?: string
+    rolObjetivo?: string
     areaFuncional?: string
-    resultadoProbable?: string
-    senialesDesperdicio?: Array<string>
-    senialesProceso?: Array<string>
-    confianza?: number
+    seniales?: Array<string>
     createdAt?: Date
     updatedAt?: Date
 }

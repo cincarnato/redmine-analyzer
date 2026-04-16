@@ -60,6 +60,13 @@ const RedmineIssueSchema = new mongoose.Schema<IRedmineIssue>({
             newValue: {type: String, required: false, index: false, unique: false}
         }]
     }],
+    relations: [{
+        id: {type: Number, required: true, index: true, unique: false},
+        issueId: {type: Number, required: true, index: true, unique: false},
+        issueToId: {type: Number, required: true, index: true, unique: false},
+        relationType: {type: String, required: false, index: false, unique: false},
+        delay: {type: Number, required: false, index: false, unique: false}
+    }],
     customFields: [{
         id: {type: Number, required: true, index: true, unique: false},
         name: {type: String, required: true, index: false, unique: false},

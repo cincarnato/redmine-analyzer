@@ -50,8 +50,33 @@ function createRedmineIssueDashboard(): IDashboardBase {
       createCard({
         title: "Distribucion ",
         type: "groupBy",
+        layout: {
+          cols: 6,
+          sm: 6,
+          md: 6,
+          lg: 6,
+          height: 420,
+          cardVariant: "outlined",
+        },
         groupBy: {
           fields: ["fixedVersion.name","tracker.name"],
+          render: "table",
+        },
+      }),
+
+      createCard({
+        title: "Distribucion ",
+        type: "groupBy",
+        layout: {
+          cols: 6,
+          sm: 6,
+          md: 6,
+          lg: 6,
+          height: 420,
+          cardVariant: "outlined",
+        },
+        groupBy: {
+          fields: ["author.name","tracker.name"],
           render: "table",
         },
       }),

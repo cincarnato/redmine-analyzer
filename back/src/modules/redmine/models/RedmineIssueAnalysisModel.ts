@@ -19,24 +19,18 @@ const RedmineIssueAnalysisSchema = new mongoose.Schema<IRedmineIssueAnalysis>({
             issue: {type: RedmineIssueSnapshotSchema, required: false },
             resumen: {type: String,   required: false, index: false, unique: false },
             categoria: {type: String,  enum: ['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro'], required: false, index: false, unique: false },
-            tipoObjetivo: {type: String,  enum: ['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro'], required: false, index: false, unique: false },
-            nivelValor: {type: String,  enum: ['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto'], required: false, index: false, unique: false },
-            nivelComplejidad: {type: String,  enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta'], required: false, index: false, unique: false },
+            causaError: {type: String,  enum: ['falla_de_aceptacion', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde'], required: false, index: false, unique: false },
+            severidadError: {type: String,  enum: ['bloqueante', 'critico', 'alto', 'medio', 'bajo'], required: false, index: false, unique: false },
+            tipoError: {type: String,  enum: ['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura'], required: false, index: false, unique: false },
+            objetivo: {type: String,  enum: ['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro'], required: false, index: false, unique: false },
+            valorNegocio: {type: String,  enum: ['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto'], required: false, index: false, unique: false },
+            complejidad: {type: String,  enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta'], required: false, index: false, unique: false },
             nivelUrgencia: {type: String,  enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta'], required: false, index: false, unique: false },
             nivelDetectabilidadDesarrollo: {type: String,  enum: ['muy_baja', 'baja', 'alta', 'muy_alta'], required: false, index: false, unique: false },
             tipoTrabajoTecnico: {type: String,  enum: ['frontend', 'backend', 'fullstack'], required: false, index: false, unique: false },
-            esError: {type: Boolean,   required: false, index: false, unique: false },
-            esRetrabajo: {type: Boolean,   required: false, index: false, unique: false },
-            esCambioMenor: {type: Boolean,   required: false, index: false, unique: false },
-            estaBloqueado: {type: Boolean,   required: false, index: false, unique: false },
-            motivoRetrabajo: {type: String,  enum: ['correccion_de_error_en_produccion', 'correccion_de_error_previo_a_produccion', 'cambio_de_requerimiento', 'caso_no_contemplado', 'ajuste_funcional', 'ajuste_tecnico', 'refactorizacion_necesaria', 'problema_de_calidad', 'problema_de_testing', 'problema_de_comunicacion', 'dependencia_externa', 'desconocido'], required: false, index: false, unique: false },
-            areasImpacto: [{type: String,  enum: ['backend', 'frontend', 'base_de_datos', 'infraestructura', 'devops', 'integraciones', 'seguridad', 'experiencia_usuario', 'datos', 'reporting', 'api', 'arquitectura', 'testing'], required: false, index: false, unique: false }],
-            grupoObjetivo: {type: String,   required: false, index: false, unique: false },
+            rolObjetivo: {type: String,   required: false, index: false, unique: false },
             areaFuncional: {type: String,   required: false, index: false, unique: false },
-            resultadoProbable: {type: String,  enum: ['valor_directo_para_negocio', 'mejora_de_calidad', 'continuidad_operativa', 'reduccion_de_riesgo', 'mejora_tecnica_interna', 'habilitador_para_trabajo_futuro', 'bajo_valor_visible', 'sin_valor_claro'], required: false, index: false, unique: false },
-            senialesDesperdicio: [{type: String,  enum: ['requerimiento_poco_claro', 'cambio_muy_pequenio', 'exceso_de_coordinacion', 'retrabajo', 'operacion_manual', 'bajo_impacto_de_negocio', 'duplicacion_de_esfuerzo', 'dependencia_evita_avance', 'analisis_excesivo', 'espera_prolongada'], required: false, index: false, unique: false }],
-            senialesProceso: [{type: String,  enum: ['buena_definicion', 'mala_definicion', 'cambio_de_alcance', 'demora_por_dependencia', 'gap_de_testing', 'resolucion_rapida', 'estimacion_desviada', 'prioridad_inestable', 'falta_de_contexto', 'buena_colaboracion', 'alto_ida_y_vuelta'], required: false, index: false, unique: false }],
-            confianza: {type: Number,   required: false, index: false, unique: false }
+            seniales: [{type: String,  enum: ['requerimiento_poco_claro', 'cambio_muy_pequenio', 'exceso_de_coordinacion', 'retrabajo', 'operacion_manual', 'bajo_impacto_de_negocio', 'duplicacion_de_esfuerzo', 'dependencia_evita_avance', 'analisis_excesivo', 'espera_prolongada', 'buena_definicion', 'mala_definicion', 'cambio_de_alcance', 'demora_por_dependencia', 'gap_de_testing', 'resolucion_rapida', 'estimacion_desviada', 'prioridad_inestable', 'falta_de_contexto', 'buena_colaboracion', 'alto_ida_y_vuelta'], required: false, index: false, unique: false }]
 }, {timestamps: true});
 
 RedmineIssueAnalysisSchema.plugin(uniqueValidator, {message: 'validation.unique'});

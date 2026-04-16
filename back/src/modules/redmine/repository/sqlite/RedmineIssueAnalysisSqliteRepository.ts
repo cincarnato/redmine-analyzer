@@ -9,9 +9,8 @@ class RedmineIssueAnalysisSqliteRepository extends AbstractSqliteRepository<IRed
     protected db: any;
     protected tableName: string = 'RedmineIssueAnalysis';
     protected dataBaseFile: string;
-    protected searchFields: string[] = ['resumen', 'grupoObjetivo', 'areaFuncional'];
-    protected booleanFields: string[] = ['esError', 'esRetrabajo', 'esCambioMenor', 'estaBloqueado'];
-    protected jsonFields: string[] = ['issue', 'areasImpacto', 'senialesDesperdicio', 'senialesProceso'];
+    protected searchFields: string[] = ['resumen', 'rolObjetivo', 'areaFuncional'];
+    protected jsonFields: string[] = ['issue', 'seniales'];
     protected identifier: string = '_id';
     protected populateFields = [
         { field: 'redmineIssue', table: 'redmineIssue', identifier: '_id' }
@@ -22,22 +21,16 @@ class RedmineIssueAnalysisSqliteRepository extends AbstractSqliteRepository<IRed
 {name: "issue", type: "TEXT", unique: undefined, primary: false},
 {name: "resumen", type: "TEXT", unique: undefined, primary: false},
 {name: "categoria", type: "TEXT", unique: undefined, primary: false},
-{name: "tipoObjetivo", type: "TEXT", unique: undefined, primary: false},
-{name: "nivelValor", type: "TEXT", unique: undefined, primary: false},
-{name: "nivelComplejidad", type: "TEXT", unique: undefined, primary: false},
+{name: "causaError", type: "TEXT", unique: undefined, primary: false},
+{name: "severidadError", type: "TEXT", unique: undefined, primary: false},
+{name: "tipoError", type: "TEXT", unique: undefined, primary: false},
+{name: "objetivo", type: "TEXT", unique: undefined, primary: false},
+{name: "valorNegocio", type: "TEXT", unique: undefined, primary: false},
+{name: "complejidad", type: "TEXT", unique: undefined, primary: false},
 {name: "nivelUrgencia", type: "TEXT", unique: undefined, primary: false},
-{name: "esError", type: "TEXT", unique: undefined, primary: false},
-{name: "esRetrabajo", type: "TEXT", unique: undefined, primary: false},
-{name: "esCambioMenor", type: "TEXT", unique: undefined, primary: false},
-{name: "estaBloqueado", type: "TEXT", unique: undefined, primary: false},
-{name: "motivoRetrabajo", type: "TEXT", unique: undefined, primary: false},
-{name: "areasImpacto", type: "TEXT", unique: undefined, primary: false},
-{name: "grupoObjetivo", type: "TEXT", unique: undefined, primary: false},
+{name: "rolObjetivo", type: "TEXT", unique: undefined, primary: false},
 {name: "areaFuncional", type: "TEXT", unique: undefined, primary: false},
-{name: "resultadoProbable", type: "TEXT", unique: undefined, primary: false},
-{name: "senialesDesperdicio", type: "TEXT", unique: undefined, primary: false},
-{name: "senialesProceso", type: "TEXT", unique: undefined, primary: false},
-{name: "confianza", type: "REAL", unique: undefined, primary: false}
+{name: "seniales", type: "TEXT", unique: undefined, primary: false}
     ]
   
 }

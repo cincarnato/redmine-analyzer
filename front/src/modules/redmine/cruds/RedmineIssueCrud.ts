@@ -53,11 +53,11 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
 {title: 'createdOn',key:'createdOn', align: 'start'},
 {title: 'updatedOn',key:'updatedOn', align: 'start'},
 {title: 'closedOn',key:'closedOn', align: 'start'},
-{title: 'project',key:'project', align: 'start'},
-{title: 'tracker',key:'tracker', align: 'start'},
-{title: 'status',key:'status', align: 'start'},
-{title: 'priority',key:'priority', align: 'start'},
-{title: 'author',key:'author', align: 'start'},
+{title: 'project',key:'project.name', align: 'start'},
+{title: 'tracker',key:'tracker.name', align: 'start'},
+{title: 'status',key:'status.name', align: 'start'},
+{title: 'priority',key:'priority.name', align: 'start'},
+{title: 'author',key:'author.name', align: 'start'},
 {title: 'fixedVersion',key:'fixedVersion', align: 'start'}
     ]
   }

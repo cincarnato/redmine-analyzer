@@ -60,28 +60,19 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
       {title: 'author', key: 'issue.author', align: 'start'},
       {title: 'fixedVersion', key: 'issue.fixedVersion', align: 'start'},
       {title: 'categoria', key: 'categoria', align: 'start'},
-      {title: 'tipoObjetivo', key: 'tipoObjetivo', align: 'start'},
-      {title: 'nivelValor', key: 'nivelValor', align: 'start'},
-      {title: 'nivelComplejidad', key: 'nivelComplejidad', align: 'start'},
+      {title: 'causaError', key: 'causaError', align: 'start'},
+      {title: 'severidadError', key: 'severidadError', align: 'start'},
+      {title: 'tipoError', key: 'tipoError', align: 'start'},
+      {title: 'objetivo', key: 'objetivo', align: 'start'},
+      {title: 'valorNegocio', key: 'valorNegocio', align: 'start'},
+      {title: 'complejidad', key: 'complejidad', align: 'start'},
       {title: 'nivelUrgencia', key: 'nivelUrgencia', align: 'start'},
       {title: 'nivelDetectabilidadDesarrollo', key: 'nivelDetectabilidadDesarrollo', align: 'start'},
       {title: 'tipoTrabajoTecnico', key: 'tipoTrabajoTecnico', align: 'start'},
-      {title: 'esError', key: 'esError', align: 'start'},
-      {title: 'esRetrabajo', key: 'esRetrabajo', align: 'start'},
-      {title: 'esCambioMenor', key: 'esCambioMenor', align: 'start'},
-      {title: 'estaBloqueado', key: 'estaBloqueado', align: 'start'},
-      {title: 'resultadoProbable', key: 'resultadoProbable', align: 'start'},
-      {title: 'confianza', key: 'confianza', align: 'start'},
       {title: 'resumen', key: 'resumen', align: 'start'},
-
-      {title: 'areasImpacto', key: 'areasImpacto', align: 'start'},
-      {title: 'motivoRetrabajo', key: 'motivoRetrabajo', align: 'start'},
-      {title: 'senialesProceso', key: 'senialesProceso', align: 'start'},
-      {title: 'senialesDesperdicio', key: 'senialesDesperdicio', align: 'start'},
-
-
+      {title: 'seniales', key: 'seniales', align: 'start'},
       {title: 'areaFuncional', key: 'areaFuncional', align: 'start'},
-      {title: 'grupoObjetivo', key: 'grupoObjetivo', align: 'start'},
+      {title: 'rolObjetivo', key: 'rolObjetivo', align: 'start'},
     ]
   }
 
@@ -139,25 +130,49 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         enum: ['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro']
       },
       {
-        name: 'tipoObjetivo',
+        name: 'causaError',
         type: 'enum',
-        label: 'tipoObjetivo',
+        label: 'causaError',
+        default: null,
+        groupTab: 'Clasificacion',
+        enum: ['falla_de_aceptacion', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']
+      },
+      {
+        name: 'severidadError',
+        type: 'enum',
+        label: 'severidadError',
+        default: null,
+        groupTab: 'Clasificacion',
+        enum: ['bloqueante', 'critico', 'alto', 'medio', 'bajo']
+      },
+      {
+        name: 'tipoError',
+        type: 'enum',
+        label: 'tipoError',
+        default: null,
+        groupTab: 'Clasificacion',
+        enum: ['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura']
+      },
+      {
+        name: 'objetivo',
+        type: 'enum',
+        label: 'objetivo',
         default: null,
         groupTab: 'Clasificacion',
         enum: ['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro']
       },
       {
-        name: 'nivelValor',
+        name: 'valorNegocio',
         type: 'enum',
-        label: 'nivelValor',
+        label: 'valorNegocio',
         default: null,
         groupTab: 'Clasificacion',
         enum: ['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto']
       },
       {
-        name: 'nivelComplejidad',
+        name: 'complejidad',
         type: 'enum',
-        label: 'nivelComplejidad',
+        label: 'complejidad',
         default: null,
         groupTab: 'Clasificacion',
         enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
@@ -186,53 +201,16 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         groupTab: 'Clasificacion',
         enum: ['frontend', 'backend', 'fullstack']
       },
-      {name: 'esError', type: 'boolean', label: 'esError', default: false, groupTab: 'Clasificacion'},
-      {name: 'esRetrabajo', type: 'boolean', label: 'esRetrabajo', default: false, groupTab: 'Clasificacion'},
-      {name: 'esCambioMenor', type: 'boolean', label: 'esCambioMenor', default: false, groupTab: 'Clasificacion'},
-      {name: 'estaBloqueado', type: 'boolean', label: 'estaBloqueado', default: false, groupTab: 'Clasificacion'},
-      {
-        name: 'motivoRetrabajo',
-        type: 'enum',
-        label: 'motivoRetrabajo',
-        default: null,
-        groupTab: 'Clasificacion',
-        enum: ['correccion_de_error_en_produccion', 'correccion_de_error_previo_a_produccion', 'cambio_de_requerimiento', 'caso_no_contemplado', 'ajuste_funcional', 'ajuste_tecnico', 'refactorizacion_necesaria', 'problema_de_calidad', 'problema_de_testing', 'problema_de_comunicacion', 'dependencia_externa', 'desconocido']
-      },
-      {
-        name: 'areasImpacto',
-        type: 'array.enum',
-        label: 'areasImpacto',
-        default: [],
-        groupTab: 'Clasificacion',
-        enum: ['backend', 'frontend', 'base_de_datos', 'infraestructura', 'devops', 'integraciones', 'seguridad', 'experiencia_usuario', 'datos', 'reporting', 'api', 'arquitectura', 'testing']
-      },
-      {name: 'grupoObjetivo', type: 'string', label: 'grupoObjetivo', default: '', groupTab: 'Clasificacion'},
+      {name: 'rolObjetivo', type: 'string', label: 'rolObjetivo', default: '', groupTab: 'Clasificacion'},
       {name: 'areaFuncional', type: 'string', label: 'areaFuncional', default: '', groupTab: 'Clasificacion'},
       {
-        name: 'resultadoProbable',
-        type: 'enum',
-        label: 'resultadoProbable',
-        default: null,
-        groupTab: 'Clasificacion',
-        enum: ['valor_directo_para_negocio', 'mejora_de_calidad', 'continuidad_operativa', 'reduccion_de_riesgo', 'mejora_tecnica_interna', 'habilitador_para_trabajo_futuro', 'bajo_valor_visible', 'sin_valor_claro']
-      },
-      {
-        name: 'senialesDesperdicio',
+        name: 'seniales',
         type: 'array.enum',
-        label: 'senialesDesperdicio',
+        label: 'seniales',
         default: [],
         groupTab: 'Seniales',
-        enum: ['requerimiento_poco_claro', 'cambio_muy_pequenio', 'exceso_de_coordinacion', 'retrabajo', 'operacion_manual', 'bajo_impacto_de_negocio', 'duplicacion_de_esfuerzo', 'dependencia_evita_avance', 'analisis_excesivo', 'espera_prolongada']
-      },
-      {
-        name: 'senialesProceso',
-        type: 'array.enum',
-        label: 'senialesProceso',
-        default: [],
-        groupTab: 'Seniales',
-        enum: ['buena_definicion', 'mala_definicion', 'cambio_de_alcance', 'demora_por_dependencia', 'gap_de_testing', 'resolucion_rapida', 'estimacion_desviada', 'prioridad_inestable', 'falta_de_contexto', 'buena_colaboracion', 'alto_ida_y_vuelta']
-      },
-      {name: 'confianza', type: 'number', label: 'confianza', default: null, groupTab: 'General'}
+        enum: ['requerimiento_poco_claro', 'cambio_muy_pequenio', 'exceso_de_coordinacion', 'retrabajo', 'operacion_manual', 'bajo_impacto_de_negocio', 'duplicacion_de_esfuerzo', 'dependencia_evita_avance', 'analisis_excesivo', 'espera_prolongada', 'buena_definicion', 'mala_definicion', 'cambio_de_alcance', 'demora_por_dependencia', 'gap_de_testing', 'resolucion_rapida', 'estimacion_desviada', 'prioridad_inestable', 'falta_de_contexto', 'buena_colaboracion', 'alto_ida_y_vuelta']
+      }
     ]
   }
 

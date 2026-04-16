@@ -10,7 +10,7 @@ class RedmineIssueAnalysisMongoRepository extends AbstractMongoRepository<IRedmi
     constructor() {
         super();
         this._model = RedmineIssueAnalysisModel;
-        this._searchFields = ['resumen', 'grupoObjetivo', 'areaFuncional'];
+        this._searchFields = ['resumen', 'rolObjetivo', 'areaFuncional'];
         this._populateFields = ['redmineIssue'];
         this._lean = true
     }
@@ -19,4 +19,3 @@ class RedmineIssueAnalysisMongoRepository extends AbstractMongoRepository<IRedmi
 
 export default RedmineIssueAnalysisMongoRepository
 export {RedmineIssueAnalysisMongoRepository}
-

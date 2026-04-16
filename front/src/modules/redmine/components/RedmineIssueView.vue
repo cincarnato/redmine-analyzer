@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import {
   IRedmineIssue,
+  IRedmineIssueRelation,
   IRedmineIssueJournalDetail
 } from '../interfaces/IRedmineIssue';
 
@@ -53,6 +54,40 @@ const journals = computed(() => {
     const right = b.createdOn ? new Date(b.createdOn).getTime() : 0;
     return right - left;
   });
+});
+
+const relationTypeLabel = (relationType?: string) => {
+  if (!relationType) return 'Relacion';
+
+  const labels: Record<string, string> = {
+    relates: 'Relacionada',
+    blocks: 'Bloquea',
+    blocked: 'Bloqueada por',
+    precedes: 'Precede',
+    follows: 'Sigue a',
+    copied_to: 'Copiada a',
+    copied_from: 'Copiada de',
+    duplicates: 'Duplica',
+    duplicated: 'Duplicada por'
+  };
+
+  return labels[relationType] || relationType;
+};
+
+const relations = computed(() => {
+  return [...(props.redmineIssue.relations || [])]
+    .map((relation: IRedmineIssueRelation) => {
+      const isSource = relation.issueId === props.redmineIssue.redmineId;
+      const relatedIssueId = isSource ? relation.issueToId : relation.issueId;
+
+      return {
+        ...relation,
+        relatedIssueId,
+        directionLabel: isSource ? 'saliente' : 'entrante',
+        relationLabel: relationTypeLabel(relation.relationType)
+      };
+    })
+    .sort((a, b) => a.relatedIssueId - b.relatedIssueId);
 });
 
 const summaryItems = computed(() => ([
@@ -133,6 +168,13 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
             >
               {{ journals.length }} journals
             </v-chip>
+            <v-chip
+              variant="outlined"
+              size="small"
+              prepend-icon="mdi-source-branch"
+            >
+              {{ relations.length }} relaciones
+            </v-chip>
           </div>
 
           <div class="summary-grid">
@@ -171,6 +213,41 @@ const detailValue = (value?: string) => value?.trim() || 'vacio';
         </v-card>
 
         <v-card variant="flat" color="grey-lighten-4" class="rounded-lg pa-4 compact-card">
+          <div class="d-flex justify-space-between align-center mb-3">
+            <div class="section-title">Relaciones</div>
+            <span class="text-caption text-medium-emphasis">{{ relations.length }} enlaces</span>
+          </div>
+
+          <div v-if="relations.length" class="d-flex flex-column compact-gap-sm mb-4">
+            <v-card
+              v-for="relation in relations"
+              :key="relation.id"
+              variant="outlined"
+              class="journal-card"
+            >
+              <v-card-text class="pa-3">
+                <div class="d-flex align-center justify-space-between compact-gap-sm flex-wrap">
+                  <div class="d-flex align-center flex-wrap compact-gap-sm">
+                    <v-chip size="x-small" color="primary" variant="flat" class="font-weight-bold">
+                      #{{ relation.relatedIssueId }}
+                    </v-chip>
+                    <span class="text-body-2 font-weight-bold">{{ relation.relationLabel }}</span>
+                    <v-chip size="x-small" variant="outlined">
+                      {{ relation.directionLabel }}
+                    </v-chip>
+                  </div>
+                  <span v-if="relation.delay != null" class="text-caption text-medium-emphasis">
+                    Delay: {{ relation.delay }}
+                  </span>
+                </div>
+              </v-card-text>
+            </v-card>
+          </div>
+
+          <div v-else class="text-body-2 text-medium-emphasis mb-4">
+            Este issue no tiene relaciones sincronizadas.
+          </div>
+
           <div class="d-flex justify-space-between align-center mb-3">
             <div class="section-title">Journals</div>
             <span class="text-caption text-medium-emphasis">{{ journals.length }} entradas</span>

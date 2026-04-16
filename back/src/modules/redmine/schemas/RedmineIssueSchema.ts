@@ -31,6 +31,14 @@ const JournalSchema = z.object({
     details: z.array(JournalDetailSchema).nullish(),
 });
 
+const RelationSchema = z.object({
+    id: z.number().min(0, 'validation.required').nullish(),
+    issueId: z.number().min(0, 'validation.required').nullish(),
+    issueToId: z.number().min(0, 'validation.required').nullish(),
+    relationType: z.string().nullish(),
+    delay: z.number().nullish(),
+});
+
 const RedmineIssueBaseSchema = z.object({
     redmineId: z.number().min(0, 'validation.required').nullish(),
     subject: z.string().nullish(),
@@ -55,6 +63,7 @@ const RedmineIssueBaseSchema = z.object({
     author: LooseNamedEntitySchema.nullish(),
     fixedVersion: LooseNamedEntitySchema.nullish(),
     journals: z.array(JournalSchema).nullish(),
+    relations: z.array(RelationSchema).nullish(),
     customFields: z.array(CustomFieldSchema).nullish(),
     syncSource: z.string().default('redmine').nullish(),
     rawPayload: z.record(z.string(), z.unknown()).nullish(),

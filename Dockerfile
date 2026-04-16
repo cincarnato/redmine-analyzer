@@ -41,9 +41,9 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Native deps for node-gyp (better-sqlite3, etc.)
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
+#RUN apt-get update \
+#  && apt-get install -y --no-install-recommends python3 make g++ \
+#  && rm -rf /var/lib/apt/lists/*
 
 RUN npm install pm2 -g
 

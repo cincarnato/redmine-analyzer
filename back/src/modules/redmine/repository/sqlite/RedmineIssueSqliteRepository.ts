@@ -11,7 +11,7 @@ class RedmineIssueSqliteRepository extends AbstractSqliteRepository<IRedmineIssu
     protected dataBaseFile: string;
     protected searchFields: string[] = ['redmineId', 'subject', 'description'];
     protected booleanFields: string[] = ['isPrivate'];
-    protected jsonFields: string[] = ['project', 'tracker', 'status', 'priority', 'author', 'fixedVersion', 'journals', 'customFields', 'rawPayload'];
+    protected jsonFields: string[] = ['project', 'tracker', 'status', 'priority', 'author', 'fixedVersion', 'journals', 'relations', 'customFields', 'rawPayload'];
     protected identifier: string = 'redmineId';
     protected populateFields = [
         
@@ -39,6 +39,7 @@ class RedmineIssueSqliteRepository extends AbstractSqliteRepository<IRedmineIssu
 {name: "author", type: "TEXT", unique: undefined, primary: false},
 {name: "fixedVersion", type: "TEXT", unique: undefined, primary: false},
 {name: "journals", type: "TEXT", unique: undefined, primary: false},
+{name: "relations", type: "TEXT", unique: undefined, primary: false},
 {name: "customFields", type: "TEXT", unique: undefined, primary: false},
 {name: "syncSource", type: "TEXT", unique: undefined, primary: false},
 {name: "rawPayload", type: "TEXT", unique: undefined, primary: false}

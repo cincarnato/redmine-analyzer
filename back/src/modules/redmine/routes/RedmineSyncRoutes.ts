@@ -56,7 +56,7 @@ async function RedmineSyncFastifyRoutes(fastify, options) {
         {
             schema: {
                 tags: ["redmine"],
-                summary: "Sync Redmine issues by project and creation date range",
+                summary: "Sync Redmine issues by project and selected date field range",
                 body: {
                     type: "object",
                     required: ["projectId", "dateFrom", "dateTo"],
@@ -64,6 +64,10 @@ async function RedmineSyncFastifyRoutes(fastify, options) {
                         projectId: {type: ["number", "string"]},
                         dateFrom: {type: "string"},
                         dateTo: {type: "string"},
+                        dateField: {
+                            type: "string",
+                            enum: ["created_on", "closed_on"],
+                        },
                         includeJournals: {type: "boolean"},
                         statusIds: {
                             type: "array",
@@ -78,6 +82,10 @@ async function RedmineSyncFastifyRoutes(fastify, options) {
                             projectId: {type: ["number", "string"]},
                             dateFrom: {type: "string"},
                             dateTo: {type: "string"},
+                            dateField: {
+                                type: "string",
+                                enum: ["created_on", "closed_on"],
+                            },
                             includeJournals: {type: "boolean"},
                             statusIds: {
                                 type: "array",

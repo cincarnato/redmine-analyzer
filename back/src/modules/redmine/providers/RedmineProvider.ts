@@ -2,6 +2,7 @@ type Primitive = string | number | boolean;
 type QueryValue = Primitive | null | undefined;
 type QueryParams = Record<string, QueryValue>;
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
+type RedmineIssueDateField = "created_on" | "closed_on";
 
 interface RedmineProviderOptions {
     timeout?: number;
@@ -364,7 +365,7 @@ class RedmineProvider {
             status_id: resolvedStatusId as QueryValue,
             tracker_id: tracker_id as QueryValue,
             project_id: this.defaultProject as QueryValue,
-            include: "journals",
+            include: "journals,relations",
             sort: orderBy ? `${orderBy}${orderDesc ? ":desc" : ""}` : undefined,
         });
     }
@@ -378,7 +379,7 @@ class RedmineProvider {
             author_id: author_id as QueryValue,
             tracker_id: tracker_id as QueryValue,
             project_id: this.defaultProject as QueryValue,
-            include: "journals",
+            include: "journals,relations",
             sort: orderBy ? `${orderBy}${orderDesc ? ":desc" : ""}` : undefined,
         });
     }
@@ -392,7 +393,7 @@ class RedmineProvider {
             tracker_id: tracker_id as QueryValue,
             status_id: resolvedStatusId as QueryValue,
             project_id: this.defaultProject as QueryValue,
-            include: "journals",
+            include: "journals,relations",
             sort: orderBy ? `${orderBy}${orderDesc ? ":desc" : ""}` : undefined,
         };
 
@@ -410,8 +411,9 @@ class RedmineProvider {
             orderDesc = null,
             status_id = "*",
             tracker_id = null,
-            created_from,
-            created_to,
+            dateField = "closed_on",
+            date_from,
+            date_to,
         }: {
             offset?: number;
             limit?: number;
@@ -419,8 +421,9 @@ class RedmineProvider {
             orderDesc?: boolean | null;
             status_id?: string | number;
             tracker_id?: string | number | null;
-            created_from?: string | Date | null;
-            created_to?: string | Date | null;
+            dateField?: RedmineIssueDateField;
+            date_from?: string | Date | null;
+            date_to?: string | Date | null;
         } = {},
     ) {
         const resolvedStatusId = await this.getStatusId(status_id);
@@ -430,25 +433,26 @@ class RedmineProvider {
             status_id: resolvedStatusId as QueryValue,
             tracker_id: tracker_id as QueryValue,
             project_id: projectId as QueryValue,
+            include: "relations",
             sort: orderBy ? `${orderBy}${orderDesc ? ":desc" : ""}` : undefined,
         };
 
-        const formattedCreatedFrom = this.formatDate(created_from);
-        const formattedCreatedTo = this.formatDate(created_to);
+        const formattedDateFrom = this.formatDate(date_from);
+        const formattedDateTo = this.formatDate(date_to);
 
-        if (formattedCreatedFrom && formattedCreatedTo) {
-            params.created_on = `><${formattedCreatedFrom}|${formattedCreatedTo}`;
-        } else if (formattedCreatedFrom) {
-            params.created_on = `>=${formattedCreatedFrom}`;
-        } else if (formattedCreatedTo) {
-            params.created_on = `<=${formattedCreatedTo}`;
+        if (formattedDateFrom && formattedDateTo) {
+            params[dateField] = `><${formattedDateFrom}|${formattedDateTo}`;
+        } else if (formattedDateFrom) {
+            params[dateField] = `>=${formattedDateFrom}`;
+        } else if (formattedDateTo) {
+            params[dateField] = `<=${formattedDateTo}`;
         }
 
         return this.get("issues.json", params);
     }
 
     async findIssueById(id: string | number) {
-        const result = await this.get<{issue?: Record<string, any>}>(`issues/${id}.json?include=journals`, {
+        const result = await this.get<{issue?: Record<string, any>}>(`issues/${id}.json?include=journals,relations`, {
             offset: 0,
             limit: 1,
         });

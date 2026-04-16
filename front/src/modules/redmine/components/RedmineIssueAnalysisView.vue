@@ -8,19 +8,162 @@ const props = defineProps<{
   redmineIssueAnalysis: IRedmineIssueAnalysis
 }>()
 
-const confianzaPorcentaje = computed(() => {
-  return Math.round((props.redmineIssueAnalysis?.confianza || 0) * 100);
-});
-
 const issueDetail = computed(() => {
   return (props.redmineIssueAnalysis?.issue ?? null) as IRedmineIssue | null;
 });
 
-const getConfianzaColor = (val: number) => {
-  if (val >= 80) return 'success';
-  if (val >= 50) return 'warning';
-  return 'error';
+const errorCauseDescriptions: Record<string, string> = {
+  falla_de_aceptacion: 'La funcionalidad entregada no cumple con los criterios de aceptación definidos.',
+  regresion: 'Una funcionalidad que antes funcionaba correctamente dejó de hacerlo por cambios recientes.',
+  definicion_incompleta: 'Se detecta un problema pero no hay criterios claros que definan el comportamiento esperado.',
+  detalle_menor: 'Error de bajo impacto que no impide el uso, pero afecta calidad o prolijidad.',
+  oportunidad_de_mejora: 'No es un error, pero se identifica en pruebas QA una mejora clara en usabilidad, eficiencia o diseño.',
+  problema_de_integracion: 'El error se origina en la interacción con sistemas externos o APIs.',
+  problema_de_datos: 'El error se debe a datos incorrectos, inconsistentes o corruptos.',
+  problema_de_entorno: 'El problema está en la configuración del sistema o diferencias entre entornos.',
+  error_de_usuario: 'El comportamiento incorrecto se debe a un uso indebido del sistema, no a un bug.',
+  caso_borde: 'El error ocurre en un escenario poco común que no fue considerado en el diseño original.',
 };
+
+const errorSeverityDescriptions: Record<string, string> = {
+  bloqueante: 'El sistema o funcionalidad queda totalmente inutilizable. No hay workaround.',
+  critico: 'El sistema funciona parcialmente, pero hay un impacto severo en operaciones clave.',
+  alto: 'Hay un problema importante, pero existe workaround o no bloquea completamente la operación.',
+  medio: 'Problema moderado que no impacta significativamente la operación, pero debería corregirse.',
+  bajo: 'Impacto mínimo, generalmente relacionado a detalles visuales o mejoras menores.',
+};
+
+const errorTypeDescriptions: Record<string, string> = {
+  funcional: 'El sistema no cumple la funcionalidad esperada.',
+  regla_de_negocio: 'La implementación no respeta reglas del negocio, aunque técnicamente funcione.',
+  validacion: 'Problemas en las reglas de validación de datos de entrada.',
+  seguridad: 'Existe un riesgo de acceso indebido, exposición de datos o vulnerabilidad.',
+  performance: 'El sistema presenta lentitud, consumo excesivo de recursos o baja eficiencia.',
+  interfaz: 'Problemas en la experiencia de usuario o presentación visual.',
+  integracion: 'Problemas en la comunicación con sistemas externos.',
+  integridad_de_datos: 'Los datos son incorrectos, inconsistentes o se corrompen.',
+  compatibilidad: 'El sistema no funciona correctamente en ciertos dispositivos, navegadores o entornos.',
+  configuracion: 'El problema está en configuración incorrecta del sistema.',
+  infraestructura: 'El problema proviene de infraestructura o entorno técnico.',
+};
+
+const errorCauseOptions = [
+  { value: 'falla_de_aceptacion', description: errorCauseDescriptions.falla_de_aceptacion },
+  { value: 'regresion', description: errorCauseDescriptions.regresion },
+  { value: 'definicion_incompleta', description: errorCauseDescriptions.definicion_incompleta },
+  { value: 'detalle_menor', description: errorCauseDescriptions.detalle_menor },
+  { value: 'oportunidad_de_mejora', description: errorCauseDescriptions.oportunidad_de_mejora },
+  { value: 'problema_de_integracion', description: errorCauseDescriptions.problema_de_integracion },
+  { value: 'problema_de_datos', description: errorCauseDescriptions.problema_de_datos },
+  { value: 'problema_de_entorno', description: errorCauseDescriptions.problema_de_entorno },
+  { value: 'error_de_usuario', description: errorCauseDescriptions.error_de_usuario },
+  { value: 'caso_borde', description: errorCauseDescriptions.caso_borde },
+];
+
+const errorSeverityOptions = [
+  { value: 'bloqueante', description: errorSeverityDescriptions.bloqueante },
+  { value: 'critico', description: errorSeverityDescriptions.critico },
+  { value: 'alto', description: errorSeverityDescriptions.alto },
+  { value: 'medio', description: errorSeverityDescriptions.medio },
+  { value: 'bajo', description: errorSeverityDescriptions.bajo },
+];
+
+const errorTypeOptions = [
+  { value: 'funcional', description: errorTypeDescriptions.funcional },
+  { value: 'regla_de_negocio', description: errorTypeDescriptions.regla_de_negocio },
+  { value: 'validacion', description: errorTypeDescriptions.validacion },
+  { value: 'seguridad', description: errorTypeDescriptions.seguridad },
+  { value: 'performance', description: errorTypeDescriptions.performance },
+  { value: 'interfaz', description: errorTypeDescriptions.interfaz },
+  { value: 'integracion', description: errorTypeDescriptions.integracion },
+  { value: 'integridad_de_datos', description: errorTypeDescriptions.integridad_de_datos },
+  { value: 'compatibilidad', description: errorTypeDescriptions.compatibilidad },
+  { value: 'configuracion', description: errorTypeDescriptions.configuracion },
+  { value: 'infraestructura', description: errorTypeDescriptions.infraestructura },
+];
+
+const formatEnumLabel = (value?: string | null) => {
+  if (!value) return '-';
+
+  return value
+    .split('_')
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const errorAnalysisItems = computed(() => [
+  {
+    title: 'Causa Error',
+    value: props.redmineIssueAnalysis?.causaError,
+    description: errorCauseDescriptions[props.redmineIssueAnalysis?.causaError ?? ''],
+    icon: 'mdi-source-branch-alert',
+    color: 'error',
+    options: errorCauseOptions,
+  },
+  {
+    title: 'Severidad Error',
+    value: props.redmineIssueAnalysis?.severidadError,
+    description: errorSeverityDescriptions[props.redmineIssueAnalysis?.severidadError ?? ''],
+    icon: 'mdi-alert-decagram',
+    color: 'error',
+    options: errorSeverityOptions,
+  },
+  {
+    title: 'Tipo Error',
+    value: props.redmineIssueAnalysis?.tipoError,
+    description: errorTypeDescriptions[props.redmineIssueAnalysis?.tipoError ?? ''],
+    icon: 'mdi-bug-outline',
+    color: 'warning',
+    options: errorTypeOptions,
+  },
+  {
+    title: 'Detectabilidad Dev',
+    value: props.redmineIssueAnalysis?.nivelDetectabilidadDesarrollo,
+    description: 'Indica cuan probable es que el problema sea detectado durante el desarrollo antes de llegar a QA o produccion.',
+    icon: 'mdi-radar',
+    color: 'warning',
+    options: [],
+  },
+]);
+
+const contextAnalysisItems = computed(() => [
+  {
+    title: 'Objetivo',
+    value: props.redmineIssueAnalysis?.objetivo,
+    icon: 'mdi-target',
+    color: 'primary',
+  },
+  {
+    title: 'Valor Negocio',
+    value: props.redmineIssueAnalysis?.valorNegocio,
+    icon: 'mdi-diamond-stone',
+    color: 'primary',
+  },
+  {
+    title: 'Complejidad',
+    value: props.redmineIssueAnalysis?.complejidad,
+    icon: 'mdi-head-cog',
+    color: 'primary',
+  },
+  {
+    title: 'Urgencia',
+    value: props.redmineIssueAnalysis?.nivelUrgencia,
+    icon: 'mdi-alert-octagon',
+    color: 'error',
+  },
+  {
+    title: 'Rol Objetivo',
+    value: props.redmineIssueAnalysis?.rolObjetivo,
+    icon: 'mdi-account-group',
+    color: 'primary',
+  },
+  {
+    title: 'Área Funcional',
+    value: props.redmineIssueAnalysis?.areaFuncional,
+    icon: 'mdi-puzzle',
+    color: 'primary',
+  },
+]);
 </script>
 
 <template>
@@ -34,230 +177,164 @@ const getConfianzaColor = (val: number) => {
               {{ redmineIssueAnalysis.categoria || 'Sin Categoría' }}
             </v-chip>
             <span class="text-caption text-medium-emphasis font-weight-medium">
-              ID: #{{ redmineIssueAnalysis.redmineIssue?.id || 'N/A' }}
+              ID: #{{ redmineIssueAnalysis.issue?.redmineId || 'N/A' }}
             </span>
           </div>
-          <h2 class="analysis-title font-weight-black mb-0 text-high-emphasis">
+          <h2 class="font-weight-bold mb-0 text-high-emphasis">
             {{ redmineIssueAnalysis.resumen || 'Sin Resumen' }}
           </h2>
         </div>
 
-        <div class="mt-3 mt-md-0 d-flex flex-column align-center bg-grey-lighten-4 pa-3 rounded-lg confidence-panel">
-          <v-progress-circular
-            :model-value="confianzaPorcentaje"
-            :size="64"
-            :width="6"
-            :color="getConfianzaColor(confianzaPorcentaje)"
-          >
-            <span class="text-body-1 font-weight-black">{{ confianzaPorcentaje }}%</span>
-          </v-progress-circular>
-          <span class="text-caption mt-1 font-weight-bold text-uppercase">Confianza</span>
-        </div>
       </v-card-text>
     </v-card>
 
-    <!-- Status Flags Row -->
-    <div class="d-flex flex-wrap compact-gap-sm mb-4">
-      <v-chip
-        v-if="redmineIssueAnalysis.esError"
-        color="error"
-        prepend-icon="mdi-alert-circle"
-        variant="elevated"
-        class="font-weight-bold"
-        size="small"
-      >
-        Es Error
-      </v-chip>
-      <v-chip
-        v-if="redmineIssueAnalysis.esRetrabajo"
-        color="warning"
-        prepend-icon="mdi-history"
-        variant="elevated"
-        class="font-weight-bold"
-        size="small"
-      >
-        Es Retrabajo
-      </v-chip>
-      <v-chip
-        v-if="redmineIssueAnalysis.esCambioMenor"
-        color="info"
-        prepend-icon="mdi-pencil-circle"
-        variant="flat"
-        class="font-weight-bold"
-        size="small"
-      >
-        Cambio Menor
-      </v-chip>
-      <v-chip
-        v-if="redmineIssueAnalysis.estaBloqueado"
-        color="error"
-        prepend-icon="mdi-block-helper"
-        variant="elevated"
-        class="font-weight-bold"
-        size="small"
-      >
-        Bloqueado
-      </v-chip>
-    </div>
-
     <v-row dense class="compact-row">
-      <!-- Left Column: Classification & Reason -->
-      <v-col cols="12" md="8">
-        <!-- Conditional Rework Notice -->
-        <v-alert
-          v-if="redmineIssueAnalysis.esRetrabajo && redmineIssueAnalysis.motivoRetrabajo"
-          icon="mdi-alert"
-          color="warning"
-          variant="tonal"
-          border="start"
-          class="mb-4 rounded-lg compact-alert"
-          title="Motivo de Retrabajo"
-        >
-          <div class="text-body-2 font-italic font-weight-medium mt-1">
-            "{{ redmineIssueAnalysis.motivoRetrabajo }}"
-          </div>
-        </v-alert>
+      <v-col cols="12" md="6">
+        <v-card class="mb-4 rounded-lg compact-card h-100" elevation="1" border>
+          <v-card-text class="pa-4">
+            <div class="d-flex align-center justify-space-between flex-wrap compact-gap-sm mb-4">
+              <div>
+                <div class="metric-label text-medium-emphasis">Contexto Funcional</div>
+                <div class="section-title font-weight-bold text-high-emphasis">Priorización y alcance</div>
+              </div>
+              <v-chip size="small" color="primary" variant="tonal" class="font-weight-bold">
+                Contexto
+              </v-chip>
+            </div>
 
-        <!-- Classification Grid -->
-        <v-row dense class="mb-4">
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Tipo Objetivo</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.tipoObjetivo || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-target</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Nivel Valor</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.nivelValor || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-diamond-stone</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Complejidad</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.nivelComplejidad || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-head-cog</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Urgencia</div>
-                <div class="metric-value font-weight-bold text-error">{{ redmineIssueAnalysis.nivelUrgencia || '-' }}</div>
-              </div>
-              <v-icon size="large" color="error" class="opacity-30">mdi-alert-octagon</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Detectabilidad Dev</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.nivelDetectabilidadDesarrollo || '-' }}</div>
-              </div>
-              <v-icon size="large" color="warning" class="opacity-30">mdi-radar</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Trabajo Técnico</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.tipoTrabajoTecnico || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-layers-triple</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Grupo Objetivo</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.grupoObjetivo || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-account-group</v-icon>
-            </v-card>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-card variant="flat" color="grey-lighten-4" class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card">
-              <div>
-                <div class="metric-label text-medium-emphasis">Área Funcional</div>
-                <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.areaFuncional || '-' }}</div>
-              </div>
-              <v-icon size="large" color="primary" class="opacity-30">mdi-puzzle</v-icon>
-            </v-card>
-          </v-col>
-        </v-row>
+            <v-row dense>
+              <v-col
+                v-for="item in contextAnalysisItems"
+                :key="item.title"
+                cols="12"
+                sm="6"
+              >
+                <v-card
+                  variant="flat"
+                  color="grey-lighten-4"
+                  class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate compact-metric-card"
+                >
+                  <div class="pr-4">
+                    <div class="metric-label text-medium-emphasis">{{ item.title }}</div>
+                    <div class="metric-value font-weight-bold">{{ item.value || '-' }}</div>
+                  </div>
+                  <v-icon :color="item.color" size="large" class="opacity-30">{{ item.icon }}</v-icon>
+                </v-card>
+              </v-col>
 
-        <!-- Probable Outcome -->
-        <v-card border elevation="0" class="rounded-lg pa-4 border-opacity-25 compact-card" v-if="redmineIssueAnalysis.resultadoProbable">
-          <div class="metric-label text-medium-emphasis mb-1">Resultado Probable</div>
-          <div class="text-body-1 font-weight-bold text-primary">{{ redmineIssueAnalysis.resultadoProbable }}</div>
+              <v-col cols="12" sm="6">
+                <v-card
+                  variant="tonal"
+                  color="primary"
+                  class="rounded-lg pa-4 bg-blue-grey-lighten-5 compact-metric-card h-100"
+                >
+                  <div class="metric-label font-weight-bold mb-2 text-primary">Señales</div>
+                  <div class="d-flex flex-wrap compact-gap-xs">
+                    <template v-if="redmineIssueAnalysis.seniales && redmineIssueAnalysis.seniales.length">
+                      <v-chip
+                        v-for="senial in redmineIssueAnalysis.seniales"
+                        :key="senial"
+                        color="primary"
+                        variant="outlined"
+                        class="font-weight-bold bg-white"
+                        size="small"
+                      >
+                        {{ senial }}
+                      </v-chip>
+                    </template>
+                    <span v-else class="text-caption font-italic text-primary">No hay señales identificadas</span>
+                  </div>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-card
+                  variant="flat"
+                  color="grey-lighten-4"
+                  class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card"
+                >
+                  <div>
+                    <div class="metric-label text-medium-emphasis">Trabajo Técnico</div>
+                    <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.tipoTrabajoTecnico || '-' }}</div>
+                  </div>
+                  <v-icon size="large" color="primary" class="opacity-30">mdi-layers-triple</v-icon>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- Right Column: Impact & Signals -->
-      <v-col cols="12" md="4">
-        <!-- Impact Areas -->
-        <v-card variant="flat" color="grey-lighten-4" class="rounded-lg pa-4 mb-4 compact-card">
-          <div class="metric-label font-weight-bold mb-2">Áreas de Impacto</div>
-          <div v-if="redmineIssueAnalysis.areasImpacto && redmineIssueAnalysis.areasImpacto.length" class="d-flex flex-column compact-gap-sm">
-            <v-card
-              v-for="area in redmineIssueAnalysis.areasImpacto"
-              :key="area"
-              class="d-flex align-center pa-2 rounded-lg elevation-0 compact-list-item"
-            >
-              <v-avatar color="primary-lighten-4" size="28" class="mr-2 text-primary">
-                <v-icon size="small">mdi-check-circle-outline</v-icon>
-              </v-avatar>
-              <span class="text-body-2 font-weight-bold">{{ area }}</span>
-            </v-card>
-          </div>
-          <div v-else class="text-caption text-medium-emphasis font-italic">No hay áreas identificadas</div>
-        </v-card>
-
-        <!-- Waste Signals -->
-        <v-card variant="tonal" color="deep-purple-darken-1" class="rounded-lg pa-4 mb-4 bg-deep-purple-lighten-5 compact-card">
-          <div class="metric-label font-weight-bold mb-2 text-deep-purple-darken-3">Señales de Desperdicio</div>
-          <div class="d-flex flex-wrap compact-gap-xs">
-            <template v-if="redmineIssueAnalysis.senialesDesperdicio && redmineIssueAnalysis.senialesDesperdicio.length">
-              <v-chip
-                v-for="st in redmineIssueAnalysis.senialesDesperdicio"
-                :key="st"
-                color="deep-purple-darken-2"
-                variant="outlined"
-                class="font-weight-bold bg-white"
-                size="small"
-              >
-                {{ st }}
+      <v-col cols="12" md="6">
+        <v-card class="mb-4 rounded-lg compact-card h-100" elevation="1" border>
+          <v-card-text class="pa-4">
+            <div class="d-flex align-center justify-space-between flex-wrap compact-gap-sm mb-4">
+              <div>
+                <div class="metric-label text-medium-emphasis">Análisis de Error</div>
+                <div class="section-title font-weight-bold text-high-emphasis">Clasificación del incidente</div>
+              </div>
+              <v-chip size="small" color="error" variant="tonal" class="font-weight-bold">
+                Clasificación
               </v-chip>
-            </template>
-            <span v-else class="text-caption font-italic text-deep-purple-darken-3">No hay señales de desperdicio</span>
-          </div>
-        </v-card>
+            </div>
 
-        <!-- Process Signals -->
-        <v-card variant="tonal" color="primary" class="rounded-lg pa-4 bg-blue-grey-lighten-5 compact-card">
-          <div class="metric-label font-weight-bold mb-2 text-primary">Señales de Proceso</div>
-
-          <v-timeline density="compact" align="start" truncate-line="both" class="compact-timeline">
-            <template v-if="redmineIssueAnalysis.senialesProceso && redmineIssueAnalysis.senialesProceso.length">
-              <v-timeline-item
-                v-for="sp in redmineIssueAnalysis.senialesProceso"
-                :key="sp"
-                dot-color="primary"
-                size="small"
+            <v-row dense>
+              <v-col
+                v-for="item in errorAnalysisItems"
+                :key="item.title"
+                cols="12"
               >
-                <div class="text-caption font-weight-bold process-item">{{ sp }}</div>
-              </v-timeline-item>
-            </template>
-            <div v-else class="text-caption font-italic text-primary">No hay señales de proceso</div>
-          </v-timeline>
+                <v-card
+                  variant="flat"
+                  color="grey-lighten-4"
+                  class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate error-analysis-card"
+                >
+                  <div class="pr-4">
+                    <div class="d-flex align-center compact-gap-xs mb-1">
+                      <div class="metric-label text-medium-emphasis">{{ item.title }}</div>
+                      <v-menu
+                        v-if="item.options?.length"
+                        location="bottom end"
+                        max-width="420"
+                      >
+                        <template #activator="{ props: menuProps }">
+                          <v-btn
+                            v-bind="menuProps"
+                            icon="mdi-help-circle-outline"
+                            size="x-small"
+                            variant="text"
+                            density="comfortable"
+                            color="medium-emphasis"
+                          />
+                        </template>
+
+                        <v-card class="rounded-lg help-menu-card" elevation="4">
+                          <v-card-text class="pa-3">
+                            <div class="help-menu-title font-weight-bold mb-2">{{ item.title }}</div>
+                            <div class="d-flex flex-column compact-gap-sm">
+                              <div
+                                v-for="option in item.options"
+                                :key="option.value"
+                                class="help-option"
+                              >
+                                <div class="text-body-2 font-weight-bold">{{ formatEnumLabel(option.value) }}</div>
+                                <div class="text-caption text-medium-emphasis">{{ option.description }}</div>
+                              </div>
+                            </div>
+                          </v-card-text>
+                        </v-card>
+                      </v-menu>
+                    </div>
+                    <div class="metric-value font-weight-bold mb-2">{{ formatEnumLabel(item.value) }}</div>
+                    <div class="metric-description text-medium-emphasis">
+                      {{ item.description || 'Sin descripcion disponible para este valor.' }}
+                    </div>
+                  </div>
+                  <v-icon :color="item.color" size="large" class="opacity-30">{{ item.icon }}</v-icon>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -287,10 +364,6 @@ const getConfianzaColor = (val: number) => {
   font-size: 0.93rem;
 }
 
-.analysis-title {
-  font-size: clamp(1.15rem, 2vw, 1.55rem);
-  line-height: 1.2;
-}
 
 .metric-label {
   font-size: 0.68rem;
@@ -301,6 +374,35 @@ const getConfianzaColor = (val: number) => {
 .metric-value {
   font-size: 0.98rem;
   line-height: 1.25;
+}
+
+.metric-description {
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.section-title {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.help-menu-card {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.help-menu-title {
+  font-size: 0.9rem;
+}
+
+.help-option {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.help-option:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .compact-card {
@@ -319,12 +421,8 @@ const getConfianzaColor = (val: number) => {
   min-height: 84px;
 }
 
-.compact-list-item {
-  min-height: 0;
-}
-
-.compact-alert :deep(.v-alert-title) {
-  font-size: 0.82rem;
+.error-analysis-card {
+  min-height: 124px;
 }
 
 .compact-gap-xs {

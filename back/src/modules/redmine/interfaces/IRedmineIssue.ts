@@ -16,6 +16,14 @@ interface IRedmineIssueJournal {
     details?: Array<IRedmineIssueJournalDetail>
 }
 
+interface IRedmineIssueRelation {
+    id: number
+    issueId: number
+    issueToId: number
+    relationType?: string
+    delay?: number
+}
+
 interface IRedmineIssueBase {
     redmineId: number
     subject: string
@@ -57,6 +65,7 @@ interface IRedmineIssueBase {
         name: string
     }
     journals?: Array<IRedmineIssueJournal>
+    relations?: Array<IRedmineIssueRelation>
     customFields?: Array<{
         id: number
         name: string
@@ -110,6 +119,7 @@ interface IRedmineIssue {
         name: string
     }
     journals?: Array<IRedmineIssueJournal>
+    relations?: Array<IRedmineIssueRelation>
     customFields?: Array<{
         id: number
         name: string
@@ -124,6 +134,7 @@ interface IRedmineIssue {
 export type {
     IRedmineIssueBase,
     IRedmineIssue,
+    IRedmineIssueRelation,
     IRedmineIssueJournal,
     IRedmineIssueJournalDetail
 }
