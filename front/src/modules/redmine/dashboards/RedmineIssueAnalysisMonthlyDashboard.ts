@@ -50,25 +50,6 @@ function createRedmineIssueDashboard(): IDashboardBase {
         },
       }),
 
-      // createCard({
-      //   title: "Errores resueltos por mes",
-      //   type: "groupBy",
-      //   layout: {
-      //     cols: 12,
-      //     sm: 12,
-      //     md: 12,
-      //     lg: 12,
-      //     height: 420,
-      //     cardVariant: "outlined",
-      //   },
-      //   filters: [{field: 'categoria', operator: 'eq', value: 'error'}],
-      //   groupBy: {
-      //     fields: ["issue.closedOn","categoria"],
-      //     dateFormat: 'month',
-      //     render: "lines",
-      //   },
-      // }),
-
       createCard({
         title: "Objetivo por categoria y valor",
         type: "groupBy",

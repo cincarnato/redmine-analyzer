@@ -35,6 +35,13 @@ const menu: MenuItem[] = [
         gallery: true,
         permission: 'redmineissueanalysis:manage'
       },
+      // {
+      //   icon: 'mdi-calendar-multiselect',
+      //   text: 'Dashboard Redmine Analysis Mensual',
+      //   link: { name: "RedmineIssueAnalysisMonthlyDashboardPage" },
+      //   gallery: true,
+      //   permission: 'redmineissueanalysis:manage'
+      // },
       {
         icon: 'mdi-view-dashboard',
         text: 'Dashboard Redmine Issues',

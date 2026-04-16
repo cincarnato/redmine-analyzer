@@ -48,7 +48,7 @@ function createRedmineIssueDashboard(): IDashboardBase {
         },
       }),
       createCard({
-        title: "Distribucion ",
+        title: "Distribucion sprint ",
         type: "groupBy",
         layout: {
           cols: 6,
@@ -65,7 +65,7 @@ function createRedmineIssueDashboard(): IDashboardBase {
       }),
 
       createCard({
-        title: "Distribucion ",
+        title: "Distribucion Autor ",
         type: "groupBy",
         layout: {
           cols: 6,

@@ -1,4 +1,5 @@
 import RedmineIssueAnalysisDashboardPage from "../pages/dashboards/RedmineIssueAnalysisDashboardPage.vue";
+import RedmineIssueAnalysisMonthlyDashboardPage from "../pages/dashboards/RedmineIssueAnalysisMonthlyDashboardPage.vue";
 import RedmineIssueDashboardPage from "../pages/dashboards/RedmineIssueDashboardPage.vue";
 
 const RedmineIssueDashboardRoute = [
@@ -6,6 +7,15 @@ const RedmineIssueDashboardRoute = [
     name: "RedmineIssueAnalysisDashboardPage",
     path: "/redmine/dashboard/analysis",
     component: RedmineIssueAnalysisDashboardPage,
+    meta: {
+      auth: true,
+      permission: "redmineissueanalysis:manage",
+    },
+  },
+  {
+    name: "RedmineIssueAnalysisMonthlyDashboardPage",
+    path: "/redmine/dashboard/analysis/monthly",
+    component: RedmineIssueAnalysisMonthlyDashboardPage,
     meta: {
       auth: true,
       permission: "redmineissueanalysis:manage",

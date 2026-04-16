@@ -138,7 +138,7 @@ onMounted(async () => {
 
         <v-row>
           <v-col cols="12">
-            <v-select
+            <v-combobox
               v-model="projectId"
               :items="projects"
               item-title="name"
