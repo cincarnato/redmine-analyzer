@@ -1,0 +1,172 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+variables:
+  SAST_DEFAULT_ANALYZERS: "semgrep"
+  DOCKER_REPO: "sndregistry.sondeosglobal.com/redmine-analyzer"
+  VERSION_REPO: ${CI_COMMIT_TAG}
+
+stages:
+  - security-scan
+  - report
+  - build
+
+##############Sección de escaneo de código
+
+sast:
+  stage: security-scan
+  variables:
+    SAST_REPORT_FORMAT: "gitlab"
+
+secret_detection:
+  stage: security-scan
+  
+trivy:
+  stage: security-scan
+  image:
+    name: aquasec/trivy:0.67.2
+    entrypoint: [""]
+  cache:
+    key: trivy-cache
+    paths:
+      - .trivy-cache/
+  variables:
+    TRIVY_CACHE_DIR: .trivy-cache
+    TRIVY_SEVERITY: CRITICAL,HIGH
+    TRIVY_IGNORE_UNFIXED: "true"
+    TRIVY_TIMEOUT: 5m
+  script:
+    - echo "Running Trivy scan on $CI_PROJECT_DIR"
+    - trivy fs --scanners vuln,secret,misconfig --severity $TRIVY_SEVERITY --ignore-unfixed --cache-dir $TRIVY_CACHE_DIR --timeout $TRIVY_TIMEOUT --format json -o trivy.json --exit-code 0 $CI_PROJECT_DIR
+  artifacts:
+    when: always
+    paths:
+      - trivy.json
+    expire_in: 7 days
+  allow_failure: true
+
+.defectdojo_upload_template: &defectdojo_upload_script
+  stage: report
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl jq
+    - echo "Listando archivos en el directorio de trabajo..."
+    - ls -laR
+  script:
+    - |
+      if [ -z "$DEFECTDOJO_URL" ] || [ -z "$DEFECTDOJO_API_KEY" ] || [ -z "$DEFECTDOJO_PRODUCT_NAME" ] || [ -z "$DEFECTDOJO_ENGAGEMENT_NAME" ]; then
+        echo "Error: Variables de entorno de DefectDojo no configuradas."
+        exit 1
+      fi
+    - |
+      if [ ! -f "$REPORT_FILE" ]; then
+        echo "Reporte $SCAN_TYPE ($REPORT_FILE) no encontrado. Omitiendo."
+        exit 0
+      fi
+    - |
+      echo "Validando contenido de $REPORT_FILE..."
+      finding_count=$(jq "$FINDINGS_QUERY | length" "$REPORT_FILE")
+      
+      if [ "$finding_count" -eq 0 ]; then
+        echo "Reporte $REPORT_FILE no contiene hallazgos; omitiendo subida."
+        exit 0
+      else
+        echo "Encontrados $finding_count hallazgos en $REPORT_FILE."
+      fi
+    - |
+      echo "Intentando Re-importar reporte a DefectDojo (Endpoint: reimport-scan)..."
+      echo "Scan Type (Parser): $SCAN_TYPE"
+      
+      RESPONSE_CODE_REIMPORT=$(curl -w "%{http_code}" -X POST "$DEFECTDOJO_URL/api/v2/reimport-scan/" \
+        -H "Authorization: Token $DEFECTDOJO_API_KEY" \
+        -F "scan_type=$SCAN_TYPE" \
+        -F "product_name=$DEFECTDOJO_PRODUCT_NAME" \
+        -F "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
+        -F "file=@$REPORT_FILE" \
+        -F "close_old_findings=true" \
+        -F "deduplication_on_engagement=true" -o response.txt)
+      
+      if [ "$RESPONSE_CODE_REIMPORT" -ge 200 ] && [ "$RESPONSE_CODE_REIMPORT" -lt 300 ]; then
+        echo "Re-importación exitosa."
+        cat response.txt
+        echo
+      elif [ "$RESPONSE_CODE_REIMPORT" -eq 400 ] && grep -q "does not exist" response.txt; then
+        echo "Test no encontrado (HTTP 400). Intentando importación inicial (Endpoint: import-scan)..."
+        echo "Test Title (Label): $TEST_TITLE"
+        
+        RESPONSE_CODE_IMPORT=$(curl -w "%{http_code}" -X POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
+          -H "Authorization: Token $DEFECTDOJO_API_KEY" \
+          -F "scan_type=$SCAN_TYPE" \
+          -F "product_name=$DEFECTDOJO_PRODUCT_NAME" \
+          -F "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
+          -F "file=@$REPORT_FILE" \
+          -F "test_title=$TEST_TITLE" \
+          -F "close_old_findings=true" \
+          -F "deduplication_on_engagement=true" -o response.txt)
+        
+        if [ "$RESPONSE_CODE_IMPORT" -ge 200 ] && [ "$RESPONSE_CODE_IMPORT" -lt 300 ]; then
+          echo "Importación inicial exitosa."
+          cat response.txt
+          echo
+        else
+          echo "Error: Falla en la importación inicial (HTTP status: $RESPONSE_CODE_IMPORT)"
+          echo "Respuesta del servidor:"
+          cat response.txt
+          exit 1
+        fi
+      else
+        echo "Error: Falla al re-importar (HTTP status: $RESPONSE_CODE_REIMPORT)"
+        echo "Respuesta del servidor:"
+        cat response.txt
+        exit 1
+      fi
+
+upload:sast:
+  <<: *defectdojo_upload_script
+  variables:
+    REPORT_FILE: "gl-sast-report.json"
+    SCAN_TYPE: "GitLab SAST Report"
+    TEST_TITLE: "Semgrep Scan (GitLab SAST Report)"
+    FINDINGS_QUERY: ".vulnerabilities"
+  needs:
+    - job: semgrep-sast
+      optional: true
+      artifacts: true
+
+upload:secrets:
+  <<: *defectdojo_upload_script
+  variables:
+    REPORT_FILE: "gl-secret-detection-report.json"
+    SCAN_TYPE: "GitLab Secret Detection Report"
+    TEST_TITLE: "GitLab Secret Detection Report"
+    FINDINGS_QUERY: ".vulnerabilities"
+  needs:
+    - job: secret_detection
+      optional: true
+      artifacts: true
+
+upload:trivy:
+  <<: *defectdojo_upload_script
+  variables:
+    REPORT_FILE: "trivy.json"
+    SCAN_TYPE: "Trivy Scan"
+    TEST_TITLE: "Trivy Scan"
+    FINDINGS_QUERY: "[ .Results[]?.Vulnerabilities[]? ]"
+  needs:
+    - job: trivy
+      optional: true
+      artifacts: true
+
+############Fin de escaneo de código#################
+
+run_build:
+  stage: build
+  image: docker:20.10.17-cli
+  services:
+    - docker:20.10.17-dind
+  script:
+    - docker build -t $DOCKER_REPO:$VERSION_REPO .
+    - docker push $DOCKER_REPO:$VERSION_REPO
+  only:
+    - tags
