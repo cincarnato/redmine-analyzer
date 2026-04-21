@@ -1,6 +1,5 @@
-
 import {EntityCrud} from "@drax/crud-vue";
-import type{
+import type {
   IDraxCrudProvider,
   IEntityCrud,
   IEntityCrudField,
@@ -25,13 +24,13 @@ class RedmineProjectCrud extends EntityCrud implements IEntityCrud {
   }
 
   static get instance(): RedmineProjectCrud {
-    if(!RedmineProjectCrud.singleton){
+    if (!RedmineProjectCrud.singleton) {
       RedmineProjectCrud.singleton = new RedmineProjectCrud()
     }
     return RedmineProjectCrud.singleton
   }
 
-  get permissions(): IEntityCrudPermissions{
+  get permissions(): IEntityCrudPermissions {
     return {
       manage: 'redmineproject:manage',
       view: 'redmineproject:view',
@@ -43,8 +42,8 @@ class RedmineProjectCrud extends EntityCrud implements IEntityCrud {
 
   get headers(): IEntityCrudHeader[] {
     return [
-        {title: 'redmineId',key:'redmineId', align: 'start'},
-{title: 'name',key:'name', align: 'start'}
+      {title: 'redmineId', key: 'redmineId', align: 'start'},
+      {title: 'name', key: 'name', align: 'start'}
     ]
   }
 
@@ -52,7 +51,7 @@ class RedmineProjectCrud extends EntityCrud implements IEntityCrud {
     return this.headers.map(header => header.key)
   }
 
-  get actionHeaders():IEntityCrudHeader[]{
+  get actionHeaders(): IEntityCrudHeader[] {
     return [
       {
         title: 'action.actions',
@@ -65,71 +64,83 @@ class RedmineProjectCrud extends EntityCrud implements IEntityCrud {
     ]
   }
 
-  get provider(): IDraxCrudProvider<any, any, any>{
+  get provider(): IDraxCrudProvider<any, any, any> {
     return RedmineProjectProvider.instance
   }
 
-  get refs(): IEntityCrudRefs{
-    return {
-
-    }
+  get refs(): IEntityCrudRefs {
+    return {}
   }
 
-  get rules():IEntityCrudRules{
+  get rules(): IEntityCrudRules {
     return {
       redmineId: [(v: any) => !!v || 'validation.required'],
-name: [(v: any) => !!v || 'validation.required'],
-goals: [],
-modules: []
+      name: [(v: any) => !!v || 'validation.required'],
+      goals: [],
+      modules: []
     }
   }
 
-  get fields(): IEntityCrudField[]{
+  get fields(): IEntityCrudField[] {
     return [
-        {name:'redmineId',type:'number',label:'redmineId',default:null,groupTab: 'General'},
-{name:'name',type:'string',label:'name',default:'',groupTab: 'General'},
-{name:'goals',type:'array.object',label:'goals',default:[],groupTab: 'Goals',objectFields: [{name:'name',type:'string',label:'name',default:''},
-{name:'description',type:'longString',label:'description',default:''}]},
-{name:'modules',type:'array.object',label:'modules',default:[],groupTab: 'Modules',objectFields: [{name:'name',type:'string',label:'name',default:''},
-{name:'description',type:'longString',label:'description',default:''}]}
+      {name: 'redmineId', type: 'number', label: 'redmineId', default: null, groupTab: 'General'},
+      {name: 'name', type: 'string', label: 'name', default: '', groupTab: 'General'},
+      {
+        name: 'goals',
+        type: 'array.object',
+        label: 'goals',
+        default: [],
+        groupTab: 'Goals',
+        objectFields: [{name: 'name', type: 'string', label: 'name', default: ''},
+          {name: 'description', type: 'longString', label: 'description', default: ''}]
+      },
+      {
+        name: 'modules',
+        type: 'array.object',
+        label: 'modules',
+        default: [],
+        groupTab: 'Modules',
+        objectFields: [{name: 'name', type: 'string', label: 'name', default: ''},
+          {name: 'description', type: 'longString', label: 'description', default: ''}]
+      }
     ]
   }
 
-  get filters():IEntityCrudFilter[]{
+  get filters(): IEntityCrudFilter[] {
     return [
       //{name: '_id', type: 'string', label: 'ID', default: '', operator: 'eq' },
     ]
   }
 
-  get isViewable(){
+  get isViewable() {
     return true
   }
 
-  get isEditable(){
+  get isEditable() {
     return true
   }
 
-  get isCreatable(){
+  get isCreatable() {
     return true
   }
 
-  get isDeletable(){
+  get isDeletable() {
     return true
   }
 
-  get isExportable(){
+  get isExportable() {
     return true
   }
 
-  get exportFormats(){
+  get exportFormats() {
     return ['CSV', 'JSON']
   }
 
-  get exportHeaders(){
+  get exportHeaders() {
     return ['_id']
   }
 
-  get isImportable(){
+  get isImportable() {
     return false
   }
 
@@ -141,40 +152,42 @@ modules: []
     return true
   }
 
-  get importFormats(){
+  get importFormats() {
     return ['CSV', 'JSON']
   }
 
-  get dialogFullscreen(){
+  get dialogFullscreen() {
     return false
   }
 
   get tabs() {
     return [
-     'General', 'Goals', 'Modules'
+      'General', 'Goals', 'Modules'
     ]
   }
 
   get menus() {
-    return [
-
-    ]
+    return []
   }
 
   get searchEnable() {
     return true
   }
 
-   get filtersEnable(){
+  get filtersEnable() {
     return true
   }
 
-  get dynamicFiltersEnable(){
+  get dynamicFiltersEnable() {
     return true
   }
 
 
-  get isAiAssistable(){
+  get isAiAssistable() {
+    return true
+  }
+
+  get isSavedQueriesEnabled() {
     return true
   }
 

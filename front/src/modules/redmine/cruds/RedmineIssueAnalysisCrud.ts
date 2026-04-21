@@ -63,6 +63,8 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
       {title: 'causaError', key: 'causaError', align: 'start'},
       {title: 'severidadError', key: 'severidadError', align: 'start'},
       {title: 'tipoError', key: 'tipoError', align: 'start'},
+      {title: 'observationError', key: 'observationError', align: 'start'},
+      {title: 'criterioError', key: 'criterioError', align: 'start'},
       {title: 'modulo', key: 'modulo', align: 'start'},
       {title: 'objetivo', key: 'objetivo', align: 'start'},
       {title: 'objetivoPropuesto', key: 'objetivoPropuesto', align: 'start'},
@@ -296,6 +298,20 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         default: null,
         groupTab: 'Clasificacion',
         enum: ['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura']
+      },
+      {
+        name: 'observationError',
+        type: 'longString',
+        label: 'observationError',
+        default: '',
+        groupTab: 'Clasificacion'
+      },
+      {
+        name: 'criterioError',
+        type: 'longString',
+        label: 'criterioError',
+        default: '',
+        groupTab: 'Clasificacion'
       },
       {
         name: 'modulo',
@@ -565,6 +581,9 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
     return true
   }
 
+  get isSavedQueriesEnabled(){
+    return true
+  }
 
 
 }

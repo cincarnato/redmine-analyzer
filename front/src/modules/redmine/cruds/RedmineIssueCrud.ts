@@ -300,6 +300,10 @@ class RedmineIssueCrud extends EntityCrud implements IEntityCrud {
     return true
   }
 
+  get isSavedQueriesEnabled(){
+    return true
+  }
+
 
 }
 

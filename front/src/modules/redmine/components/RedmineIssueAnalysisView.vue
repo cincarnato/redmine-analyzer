@@ -15,8 +15,10 @@ const issueDetail = computed(() => {
 const hasErrorAnalysis = computed(() => {
   const causaError = props.redmineIssueAnalysis?.causaError?.trim();
   const severidadError = props.redmineIssueAnalysis?.severidadError?.trim();
+  const observationError = props.redmineIssueAnalysis?.observationError?.trim();
+  const criterioError = props.redmineIssueAnalysis?.criterioError?.trim();
 
-  return Boolean(causaError && severidadError);
+  return Boolean((causaError && severidadError) || observationError || criterioError);
 });
 
 const hasDefinicionAnalysis = computed(() => {
@@ -332,6 +334,7 @@ const definitionAnalysisItems = computed(() => [
                 </v-card>
               </v-col>
             </v-row>
+
           </v-card-text>
         </v-card>
       </v-col>
@@ -354,6 +357,7 @@ const definitionAnalysisItems = computed(() => [
                 v-for="item in errorAnalysisItems"
                 :key="item.title"
                 cols="12"
+                md="6"
               >
                 <v-card
                   variant="outlined"
@@ -401,6 +405,38 @@ const definitionAnalysisItems = computed(() => [
                     </div>
                   </div>
                   <v-icon :color="item.color" size="large" class="opacity-30">{{ item.icon }}</v-icon>
+                </v-card>
+              </v-col>
+
+              <v-col
+                v-if="redmineIssueAnalysis.observationError || redmineIssueAnalysis.criterioError"
+                cols="12"
+                md="6"
+              >
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 h-100 error-analysis-card"
+                >
+                  <div class="metric-label text-medium-emphasis mb-2">Observaciones del Error</div>
+                  <div class="metric-description text-body-2">
+                    {{ redmineIssueAnalysis.observationError || 'Sin observaciones adicionales.' }}
+                  </div>
+                </v-card>
+              </v-col>
+
+              <v-col
+                v-if="redmineIssueAnalysis.observationError || redmineIssueAnalysis.criterioError"
+                cols="12"
+                md="6"
+              >
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 h-100 error-analysis-card"
+                >
+                  <div class="metric-label text-medium-emphasis mb-2">Criterio Incumplido</div>
+                  <div class="metric-description text-body-2">
+                    {{ redmineIssueAnalysis.criterioError || 'No se identifico un criterio de aceptacion especifico.' }}
+                  </div>
                 </v-card>
               </v-col>
             </v-row>

@@ -11,6 +11,8 @@ const RedmineIssueAnalysisBaseSchema = z.object({
     causaError: z.enum(['criterio_fallido', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']).nullish(),
     severidadError: z.enum(['bloqueante', 'critico', 'alto', 'medio', 'bajo']).nullish(),
     tipoError: z.enum(['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura']).nullish(),
+    observationError: z.string().nullish(),
+    criterioError: z.string().nullish(),
     modulo: z.string().nullish(),
     objetivo: z.string().nullish(),
     objetivoPropuesto: z.string().nullish(),

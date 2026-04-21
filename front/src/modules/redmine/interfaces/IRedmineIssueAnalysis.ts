@@ -8,6 +8,8 @@ interface IRedmineIssueAnalysisBase {
     causaError?: string
     severidadError?: string
     tipoError?: string
+    observationError?: string
+    criterioError?: string
     modulo?: string
     objetivo?: string
     objetivoPropuesto?: string
@@ -44,6 +46,8 @@ interface IRedmineIssueAnalysis {
     causaError?: string
     severidadError?: string
     tipoError?: string
+    observationError?: string
+    criterioError?: string
     modulo?: string
     objetivo?: string
     objetivoPropuesto?: string

@@ -147,6 +147,8 @@ const RedmineIssueErrorAnalysisPromptSchema = z.object({
         "configuracion",
         "infraestructura"
     ]).nullable(),
+    observationError: z.string().nullable(),
+    criterioError: z.string().nullable(),
     nivelDetectabilidadDesarrollo: z.enum(["muy_baja", "baja", "alta", "muy_alta"]).nullable(),
 });
 
@@ -200,6 +202,8 @@ const ERROR_ANALYSIS_FIELDS = [
     "causaError",
     "severidadError",
     "tipoError",
+    "observationError",
+    "criterioError",
     "nivelDetectabilidadDesarrollo",
 ] as const;
 
@@ -228,9 +232,20 @@ class RedmineIssueAnalyzer {
 
     private static readonly ERROR_QA_TRACKER_NAME = "Error QA";
 
-    private static readonly ERROR_QA_CONTEXT_TRACKER_NAMES = new Set(["Tarea Desarrollo", "User Story"]);
+    private static readonly ERROR_QA_CONTEXT_TRACKER_NAMES = new Set([
+        "Requerimiento",
+        "Requirement",
+        "Tarea",
+        "Tarea Desarrollo",
+        "Tarea de Desarrollo",
+        "User Story",
+    ]);
 
     private static readonly USER_STORY_TRACKER_NAMES = new Set(["User Story"]);
+
+    private static readonly ANALYZE_ISSUE_MAX_ATTEMPTS = 2;
+
+    private static readonly ANALYZE_ISSUE_RETRY_DELAY_MS = 1000;
 
     private ensureDateRange(dateFrom?: string, dateTo?: string) {
         if (!dateFrom || !dateTo) {
@@ -750,20 +765,97 @@ class RedmineIssueAnalyzer {
         return error;
     }
 
+    private async wait(ms: number) {
+        await new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
+    }
+
     private logAnalysisError(params: {
         issue: IRedmineIssue;
         error: unknown;
         promptResponse?: unknown;
+        attempt?: number;
+        maxAttempts?: number;
     }) {
-        const {issue, error, promptResponse} = params;
+        const {issue, error, promptResponse, attempt, maxAttempts} = params;
 
         console.error("[RedmineIssueAnalyzer] analyzeIssues failed", {
             redmineIssueId: issue._id,
             redmineId: issue.redmineId,
             subject: issue.subject,
+            attempt,
+            maxAttempts,
             error: this.formatErrorForLog(error),
             promptResponse,
         });
+    }
+
+    private logAnalysisRetry(params: {
+        issue: IRedmineIssue;
+        error: unknown;
+        attempt: number;
+        maxAttempts: number;
+    }) {
+        const {issue, error, attempt, maxAttempts} = params;
+
+        console.warn("[RedmineIssueAnalyzer] analyzeIssues retrying failed issue", {
+            redmineIssueId: issue._id,
+            redmineId: issue.redmineId,
+            subject: issue.subject,
+            attempt,
+            maxAttempts,
+            error: this.formatErrorForLog(error),
+        });
+    }
+
+    private async analyzeAndPersistIssue(request: CustomRequest, issue: IRedmineIssue) {
+        const existingAnalysis = await this.issueAnalysisService.findOne({
+            filters: [
+                {
+                    field: "redmineIssue",
+                    operator: "eq",
+                    value: issue._id,
+                },
+            ],
+            search: "",
+        }).catch(() => null) as IRedmineIssueAnalysis | null;
+
+        const analysis = await this.analyzeSingleIssue(request, issue);
+        return this.upsertAnalysis(issue, analysis, existingAnalysis);
+    }
+
+    private async analyzeAndPersistIssueWithRetry(request: CustomRequest, issue: IRedmineIssue) {
+        const maxAttempts = RedmineIssueAnalyzer.ANALYZE_ISSUE_MAX_ATTEMPTS;
+        let lastError: unknown;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            try {
+                return await this.analyzeAndPersistIssue(request, issue);
+            } catch (error: unknown) {
+                lastError = error;
+
+                if (attempt >= maxAttempts) {
+                    this.logAnalysisError({
+                        issue,
+                        error,
+                        attempt,
+                        maxAttempts,
+                    });
+                    break;
+                }
+
+                this.logAnalysisRetry({
+                    issue,
+                    error,
+                    attempt,
+                    maxAttempts,
+                });
+                await this.wait(RedmineIssueAnalyzer.ANALYZE_ISSUE_RETRY_DELAY_MS);
+            }
+        }
+
+        throw lastError;
     }
 
     private async analyzeSingleIssue(request: CustomRequest, issue: IRedmineIssue) {
@@ -816,8 +908,15 @@ class RedmineIssueAnalyzer {
                     "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
                     "Aplica esta etapa solo porque el ticket parece error, bug o incidente.",
                     "causaError debe elegirse solo entre: criterio_fallido, regresion, definicion_incompleta, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario, caso_borde.",
+                    "Usa criterio_fallido solo cuando haya evidencia concreta de un criterio de aceptacion o comportamiento definido que fue incumplido.",
+                    "Esa evidencia puede estar en el ticket de Error QA o en relatedContextIssues, pero debe referir a un requerimiento, user story o tarea relacionada con definiciones de comportamiento o criterios de aceptacion claros.",
+                    "No clasifiques como criterio_fallido solo porque el Error QA compare resultado obtenido versus resultado esperado; esa forma de registro por si sola no prueba que exista un criterio incumplido en la definicion inicial.",
+                    "Si el Error QA menciona explicitamente el criterio de aceptacion no cumplido del ticket original, podes usar criterio_fallido aunque el texto del ticket relacionado no este completo.",
+                    "Si no hay criterio de aceptacion o comportamiento definido identificable, elegi otra causaError mas adecuada como definicion_incompleta, regresion, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario o caso_borde.",
                     "severidadError debe elegirse solo entre: bloqueante, critico, alto, medio, bajo.",
                     "tipoError debe elegirse solo entre: funcional, regla_de_negocio, validacion, seguridad, performance, interfaz, integracion, integridad_de_datos, compatibilidad, configuracion, infraestructura.",
+                    "observationError debe explicar en texto breve que se encontro al analizar el error y justificar la causaError, tipoError y severidadError elegidas.",
+                    "criterioError debe indicar especificamente que criterio de aceptacion o comportamiento definido no se esta cumpliendo, citando o parafraseando el criterio del Error QA o del ticket relacionado. Si solo existe resultado esperado/obtenido sin criterio identificable, devolve null.",
                     "nivelDetectabilidadDesarrollo mide que tan evidente o evitable era el error para desarrollo.",
                     "Responde en espanol neutro y sin texto extra.",
                 ],
@@ -973,35 +1072,15 @@ class RedmineIssueAnalyzer {
         };
 
         for (const issue of issues) {
-            let promptResponse: any = null;
-
             try {
-                const existingAnalysis = await this.issueAnalysisService.findOne({
-                    filters: [
-                        {
-                            field: "redmineIssue",
-                            operator: "eq",
-                            value: issue._id,
-                        },
-                    ],
-                    search: "",
-                }).catch(() => null) as IRedmineIssueAnalysis | null;
-
-                const analysis = await this.analyzeSingleIssue(request, issue);
-                const action = await this.upsertAnalysis(issue, analysis, existingAnalysis);
+                const action = await this.analyzeAndPersistIssueWithRetry(request, issue);
                 result[action] += 1;
             } catch (error: any) {
-                this.logAnalysisError({
-                    issue,
-                    error,
-                    promptResponse,
-                });
-
                 result.failed += 1;
                 result.errors.push({
                     redmineIssueId: issue._id,
                     subject: issue.subject ?? `#${issue.redmineId}`,
-                    message: error?.message ?? "Unknown analysis error",
+                    message: `Failed after ${RedmineIssueAnalyzer.ANALYZE_ISSUE_MAX_ATTEMPTS} attempts: ${error?.message ?? "Unknown analysis error"}`,
                 });
             }
         }
