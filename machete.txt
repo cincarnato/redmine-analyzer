@@ -2,7 +2,7 @@ SUBCATEGORIAS DE CLASIFICACION DE ERRORES
 
 CausaError
 
-falla_de_aceptacion: La funcionalidad entregada no cumple con los criterios de aceptación definidos.
+criterio_fallido: La funcionalidad entregada no cumple con los criterios de aceptación definidos.
 regresion: Una funcionalidad que antes funcionaba correctamente dejó de hacerlo por cambios recientes.
 caso_borde: El error ocurre en un escenario poco común que no fue considerado en el diseño original.
 definicion_incompleta: Se detecta un problema pero no hay criterios claros que definan el comportamiento esperado.

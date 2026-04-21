@@ -19,7 +19,7 @@ const RedmineIssueAnalysisSchema = new mongoose.Schema<IRedmineIssueAnalysis>({
             issue: {type: RedmineIssueSnapshotSchema, required: false },
             resumen: {type: String,   required: false, index: false, unique: false },
             categoria: {type: String,  enum: ['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro'], required: false, index: false, unique: false },
-            causaError: {type: String,  enum: ['falla_de_aceptacion', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde'], required: false, index: false, unique: false },
+            causaError: {type: String,  enum: ['criterio_fallido', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde'], required: false, index: false, unique: false },
             severidadError: {type: String,  enum: ['bloqueante', 'critico', 'alto', 'medio', 'bajo'], required: false, index: false, unique: false },
             tipoError: {type: String,  enum: ['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura'], required: false, index: false, unique: false },
             modulo: {type: String, required: false, index: false, unique: false },

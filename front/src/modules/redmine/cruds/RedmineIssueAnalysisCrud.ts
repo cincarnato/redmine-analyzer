@@ -279,7 +279,7 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         label: 'causaError',
         default: null,
         groupTab: 'Clasificacion',
-        enum: ['falla_de_aceptacion', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']
+        enum: ['criterio_fallido', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']
       },
       {
         name: 'severidadError',

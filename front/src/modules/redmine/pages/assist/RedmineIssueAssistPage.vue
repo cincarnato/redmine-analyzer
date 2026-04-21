@@ -14,12 +14,13 @@ interface IAssistHistoryItem {
   editedDescription: string
 }
 
-type DescriptionMode = 'editableRaw' | 'readonlyRaw' | 'readonlyTextile'
+type DescriptionMode = 'editableRaw' | 'readonlyTextile'
 
 const analysisProvider = RedmineIssueAnalysisProvider.instance
 
 const redmineId = ref<string>('')
 const userInput = ref<string>('')
+const originalDescription = ref<string>('')
 const currentDescription = ref<string>('')
 const analysis = ref<IRedmineIssueAnalysis | null>(null)
 const analyzing = ref(false)
@@ -29,13 +30,15 @@ const okMsg = ref<string | null>(null)
 const copied = ref(false)
 const history = ref<IAssistHistoryItem[]>([])
 const historyPanels = ref<number[]>([])
-const activeTab = ref<'analysis' | 'proposal' | 'history'>('analysis')
+const activeTab = ref<'analysis' | 'original' | 'proposal' | 'history'>('analysis')
 const descriptionMode = ref<DescriptionMode>('editableRaw')
 
 const canAnalyze = computed(() => redmineId.value.trim().length > 0 && !analyzing.value && !assisting.value)
 const canAssist = computed(() => Boolean(analysis.value) && !analyzing.value && !assisting.value)
 const canReanalyzeCurrentDescription = computed(() => canAnalyze.value && currentDescription.value.trim().length > 0)
 const renderedDescription = computed(() => renderTextile(currentDescription.value))
+const renderedOriginalDescription = computed(() => renderTextile(originalDescription.value))
+const latestHistoryItem = computed(() => history.value[0] ?? null)
 
 function escapeHtml(value: string) {
   return value
@@ -143,8 +146,13 @@ async function analyze(descriptionOverride?: string) {
       descriptionOverride
     })
 
+    const analyzedDescription = result.analysis.issue?.description ?? currentDescription.value
+
     analysis.value = result.analysis
-    currentDescription.value = result.analysis.issue?.description ?? currentDescription.value
+    currentDescription.value = analyzedDescription
+    if (!descriptionOverride) {
+      originalDescription.value = analyzedDescription
+    }
     activeTab.value = 'analysis'
     okMsg.value = 'Análisis ejecutado correctamente'
   } catch (e: any) {
@@ -228,9 +236,7 @@ function formatDate(value: Date) {
           <div class="assist-hero-content">
             <div class="text-caption text-primary font-weight-bold text-uppercase">Asistencia IA Redmine</div>
             <h1 class="text-h6 font-weight-bold mb-1">Refinar una user story específica</h1>
-            <div class="text-caption text-medium-emphasis">
-              Ejecuta el mismo análisis funcional para un Redmine ID puntual y usa el resultado como contexto para mejorar la descripción del ticket.
-            </div>
+
           </div>
 
           <v-icon class="hero-icon" color="primary">mdi-text-box-edit-outline</v-icon>
@@ -257,7 +263,7 @@ function formatDate(value: Date) {
               label="Redmine ID"
               type="number"
               prepend-inner-icon="mdi-pound"
-              :disabled="analyzing || assisting"
+              :disabled="analyzing || assisting" hide-details
               @keyup.enter="analyze()"
             />
 
@@ -272,29 +278,37 @@ function formatDate(value: Date) {
               Analizar ticket
             </v-btn>
 
-            <v-btn
-              variant="tonal"
-              prepend-icon="mdi-refresh"
-              :loading="analyzing"
-              :disabled="!canReanalyzeCurrentDescription"
-              block
-              @click="analyzeEditedDescription"
-            >
-              Reanalizar descripción editada
-            </v-btn>
           </v-card-text>
         </v-card>
 
         <v-card class="rounded-lg mt-4" border>
           <v-card-title class="text-h6">Pedido de asistencia</v-card-title>
           <v-card-text class="d-flex flex-column ga-4">
+            <div
+              v-if="latestHistoryItem?.result.preguntasComentarios.length"
+              class="latest-comments"
+            >
+              <div class="text-subtitle-2 mb-2">Últimas preguntas y comentarios</div>
+              <v-list density="compact" class="latest-comments-list">
+                <v-list-item
+                  v-for="comment in latestHistoryItem.result.preguntasComentarios"
+                  :key="comment"
+                >
+                  <template #prepend>
+                    <v-icon color="primary">mdi-comment-question-outline</v-icon>
+                  </template>
+                  <v-list-item-title class="history-comment text-wrap">{{ comment }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </div>
+
             <v-textarea
               v-model="userInput"
               label="Instrucciones o respuestas para la IA"
               rows="7"
               auto-grow
               :disabled="!analysis || assisting || analyzing"
-              hint="Ejemplo: enfatizar criterios de aceptación, responder dudas previas o pedir una versión más breve."
+              hint="Ejemplo: enfatizar criterios de aceptación, responder preguntas y comentarios de la IA o pedir una versión más detallada."
               persistent-hint
             />
 
@@ -332,8 +346,11 @@ function formatDate(value: Date) {
             <v-tab value="analysis" prepend-icon="mdi-chart-timeline-variant">
               Análisis en tiempo real
             </v-tab>
+            <v-tab value="original" prepend-icon="mdi-file-document-outline">
+              Descripción original
+            </v-tab>
             <v-tab value="proposal" prepend-icon="mdi-text-box-edit-outline">
-              Última descripción propuesta
+              Descripción propuesta
             </v-tab>
             <v-tab value="history" prepend-icon="mdi-history">
               Historial de propuestas
@@ -347,9 +364,38 @@ function formatDate(value: Date) {
               <RedmineIssueAnalysisView :redmine-issue-analysis="analysis" />
             </v-window-item>
 
+            <v-window-item value="original">
+              <v-card-text>
+                <v-sheet
+                  class="textile-preview pa-4"
+                  border
+                  rounded
+                >
+                  <div
+                    v-if="originalDescription"
+                    class="textile-content"
+                    v-html="renderedOriginalDescription"
+                  />
+                  <div v-else class="text-medium-emphasis">
+                    Sin descripción original para mostrar.
+                  </div>
+                </v-sheet>
+              </v-card-text>
+            </v-window-item>
+
             <v-window-item value="proposal">
               <v-card-text>
-                <div class="d-flex align-center justify-end mb-3">
+                <div class="d-flex flex-wrap align-center justify-end ga-2 mb-3">
+                  <v-btn
+                    variant="tonal"
+                    prepend-icon="mdi-refresh"
+                    :loading="analyzing"
+                    :disabled="!canReanalyzeCurrentDescription"
+                    @click="analyzeEditedDescription"
+                  >
+                    Reanalizar propuesta
+                  </v-btn>
+
                   <v-btn
                     variant="tonal"
                     prepend-icon="mdi-content-copy"
@@ -371,9 +417,6 @@ function formatDate(value: Date) {
                   <v-btn value="editableRaw" prepend-icon="mdi-pencil">
                     Editable raw
                   </v-btn>
-                  <v-btn value="readonlyRaw" prepend-icon="mdi-text-box-outline">
-                    Readonly raw
-                  </v-btn>
                   <v-btn value="readonlyTextile" prepend-icon="mdi-format-text">
                     Readonly textile
                   </v-btn>
@@ -382,11 +425,10 @@ function formatDate(value: Date) {
                 <v-textarea
                   v-if="descriptionMode !== 'readonlyTextile'"
                   v-model="currentDescription"
-                  :label="descriptionMode === 'editableRaw' ? 'Descripción editable' : 'Descripción readonly raw'"
+                  label="Descripción editable"
                   rows="14"
                   auto-grow
-                  :readonly="descriptionMode === 'readonlyRaw'"
-                  :disabled="descriptionMode === 'editableRaw' && (assisting || analyzing)"
+                  :disabled="assisting || analyzing"
                 />
 
                 <v-sheet
@@ -493,6 +535,16 @@ function formatDate(value: Date) {
 
 .assist-success {
   margin-top: -4px;
+}
+
+.latest-comments {
+  border-radius: 8px;
+  background: rgba(var(--v-theme-primary), 0.06);
+  padding: 12px;
+}
+
+.latest-comments-list {
+  background: transparent;
 }
 
 .description-mode-toggle {

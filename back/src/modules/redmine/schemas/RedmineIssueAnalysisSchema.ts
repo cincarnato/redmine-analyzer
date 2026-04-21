@@ -8,7 +8,7 @@ const RedmineIssueAnalysisBaseSchema = z.object({
     issue: RedmineIssueBaseSchema.optional(),
     resumen: z.string().nullish(),
     categoria: z.enum(['nueva_funcionalidad', 'error', 'soporte', 'mantenimiento', 'refactorizacion', 'investigacion', 'configuracion', 'documentacion', 'tarea_tecnica', 'integracion', 'optimizacion', 'seguridad', 'datos', 'infraestructura', 'otro']).nullish(),
-    causaError: z.enum(['falla_de_aceptacion', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']).nullish(),
+    causaError: z.enum(['criterio_fallido', 'regresion', 'definicion_incompleta', 'detalle_menor', 'oportunidad_de_mejora', 'problema_de_integracion', 'problema_de_datos', 'problema_de_entorno', 'error_de_usuario', 'caso_borde']).nullish(),
     severidadError: z.enum(['bloqueante', 'critico', 'alto', 'medio', 'bajo']).nullish(),
     tipoError: z.enum(['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura']).nullish(),
     modulo: z.string().nullish(),

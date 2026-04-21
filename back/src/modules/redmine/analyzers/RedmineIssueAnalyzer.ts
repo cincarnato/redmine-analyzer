@@ -116,7 +116,7 @@ const RedmineIssueBaseAnalysisPromptSchema = z.object({
 
 const RedmineIssueErrorAnalysisPromptSchema = z.object({
     causaError: z.enum([
-        "falla_de_aceptacion",
+        "criterio_fallido",
         "regresion",
         "definicion_incompleta",
         "detalle_menor",
@@ -815,7 +815,7 @@ class RedmineIssueAnalyzer {
                     "Todos los campos del JSON deben estar presentes.",
                     "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
                     "Aplica esta etapa solo porque el ticket parece error, bug o incidente.",
-                    "causaError debe elegirse solo entre: falla_de_aceptacion, regresion, definicion_incompleta, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario, caso_borde.",
+                    "causaError debe elegirse solo entre: criterio_fallido, regresion, definicion_incompleta, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario, caso_borde.",
                     "severidadError debe elegirse solo entre: bloqueante, critico, alto, medio, bajo.",
                     "tipoError debe elegirse solo entre: funcional, regla_de_negocio, validacion, seguridad, performance, interfaz, integracion, integridad_de_datos, compatibilidad, configuracion, infraestructura.",
                     "nivelDetectabilidadDesarrollo mide que tan evidente o evitable era el error para desarrollo.",

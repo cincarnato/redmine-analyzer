@@ -27,7 +27,7 @@ const hasDefinicionAnalysis = computed(() => {
 });
 
 const errorCauseDescriptions: Record<string, string> = {
-  falla_de_aceptacion: 'La funcionalidad entregada no cumple con los criterios de aceptación definidos.',
+  criterio_fallido: 'La funcionalidad entregada no cumple con los criterios de aceptación definidos.',
   regresion: 'Una funcionalidad que antes funcionaba correctamente dejó de hacerlo por cambios recientes.',
   definicion_incompleta: 'Se detecta un problema pero no hay criterios claros que definan el comportamiento esperado.',
   detalle_menor: 'Error de bajo impacto que no impide el uso, pero afecta calidad o prolijidad.',
@@ -62,7 +62,7 @@ const errorTypeDescriptions: Record<string, string> = {
 };
 
 const errorCauseOptions = [
-  { value: 'falla_de_aceptacion', description: errorCauseDescriptions.falla_de_aceptacion },
+  { value: 'criterio_fallido', description: errorCauseDescriptions.criterio_fallido },
   { value: 'regresion', description: errorCauseDescriptions.regresion },
   { value: 'definicion_incompleta', description: errorCauseDescriptions.definicion_incompleta },
   { value: 'detalle_menor', description: errorCauseDescriptions.detalle_menor },
