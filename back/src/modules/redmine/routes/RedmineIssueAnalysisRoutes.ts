@@ -57,6 +57,54 @@ async function RedmineIssueAnalysisFastifyRoutes(fastify, options) {
         },
     }, (req, rep) => controller.analyzeIssues(req as any, rep))
 
+    fastify.post('/api/redmine-issue-analyses/analyze-one', {
+        schema: {
+            tags: ['redmine'],
+            summary: 'Analyze one Redmine issue in real time without persisting it',
+            body: {
+                type: 'object',
+                required: ['redmineId'],
+                properties: {
+                    redmineId: {type: ['number', 'string']},
+                    descriptionOverride: {type: 'string'},
+                },
+            },
+        },
+    }, (req, rep) => controller.analyzeIssue(req as any, rep))
+
+    fastify.post('/api/redmine-issue-analyses/assist', {
+        schema: {
+            tags: ['redmine'],
+            summary: 'Assist rewriting a Redmine issue description',
+            body: {
+                type: 'object',
+                required: ['redmineId'],
+                properties: {
+                    redmineId: {type: ['number', 'string']},
+                    currentDescription: {type: 'string'},
+                    userInput: {type: 'string'},
+                    analysis: {type: 'object', additionalProperties: true},
+                },
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        descripcionPropuesta: {type: 'string'},
+                        preguntasComentarios: {
+                            type: 'array',
+                            items: {type: 'string'},
+                        },
+                        tokens: {type: 'number'},
+                        inputTokens: {type: 'number'},
+                        outputTokens: {type: 'number'},
+                        time: {type: 'number'},
+                    },
+                },
+            },
+        },
+    }, (req, rep) => controller.assistIssue(req as any, rep))
+
     fastify.get('/api/redmine-issue-analyses', {schema: schemas.paginateSchema}, (req,rep) => controller.paginate(req,rep))
     
     fastify.get('/api/redmine-issue-analyses/find', {schema: schemas.findSchema}, (req,rep) => controller.find(req,rep))

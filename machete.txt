@@ -1,0 +1,38 @@
+SUBCATEGORIAS DE CLASIFICACION DE ERRORES
+
+CausaError
+
+falla_de_aceptacion: La funcionalidad entregada no cumple con los criterios de aceptación definidos.
+regresion: Una funcionalidad que antes funcionaba correctamente dejó de hacerlo por cambios recientes.
+caso_borde: El error ocurre en un escenario poco común que no fue considerado en el diseño original.
+definicion_incompleta: Se detecta un problema pero no hay criterios claros que definan el comportamiento esperado.
+detalle_menor: Error de bajo impacto que no impide el uso, pero afecta calidad o prolijidad.
+oportunidad_de_mejora: No es un error, pero se identifica en pruebas QA una oportunidad de mejora clara en usabilidad, eficiencia o diseño.
+problema_de_integracion: El error se origina en la interacción con sistemas externos o APIs.
+problema_de_datos: El error se debe a datos incorrectos, inconsistentes o corruptos.
+problema_de_entorno: El problema está en la configuración del sistema o diferencias entre entornos.
+error_de_usuario: El comportamiento incorrecto se debe a un uso indebido del sistema, no a un bug.
+
+
+SeveridadError
+
+bloqueante: El sistema o funcionalidad queda totalmente inutilizable. No hay workaround.
+critico: El sistema funciona parcialmente, pero hay un impacto severo en operaciones clave.
+alto: Hay un problema importante, pero existe workaround o no bloquea completamente la operación.
+medio: Problema moderado que no impacta significativamente la operación, pero debería corregirse.
+bajo: Impacto mínimo, generalmente relacionado a detalles visuales o mejoras menores.
+
+
+TipoError
+
+funcional: El sistema no cumple la funcionalidad esperada.
+regla_de_negocio: La implementación no respeta reglas del negocio, aunque técnicamente funcione.
+validacion: Problemas en las reglas de validación de datos de entrada.
+seguridad: Existe un riesgo de acceso indebido, exposición de datos o vulnerabilidad.
+performance: El sistema presenta lentitud, consumo excesivo de recursos o baja eficiencia.
+interfaz: Problemas en la experiencia de usuario o presentación visual.
+integracion: Problemas en la comunicación con sistemas externos.
+integridad_de_datos: Los datos son incorrectos, inconsistentes o se corrompen.
+compatibilidad: El sistema no funciona correctamente en ciertos dispositivos, navegadores o entornos.
+configuracion: El problema está en configuración incorrecta del sistema.
+infraestructura: El problema proviene de infraestructura o entorno técnico.

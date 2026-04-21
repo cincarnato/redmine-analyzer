@@ -4,14 +4,21 @@ import {AiProviderFactory} from "@drax/ai-back";
 import {z} from "zod";
 import RedmineIssueAnalysisServiceFactory from "../factory/services/RedmineIssueAnalysisServiceFactory.js";
 import RedmineIssueServiceFactory from "../factory/services/RedmineIssueServiceFactory.js";
+import RedmineProjectServiceFactory from "../factory/services/RedmineProjectServiceFactory.js";
 import type {IRedmineIssue, IRedmineIssueBase} from "../interfaces/IRedmineIssue";
-import type {IRedmineIssueAnalysisBase} from "../interfaces/IRedmineIssueAnalysis";
+import type {IRedmineIssueAnalysis, IRedmineIssueAnalysisBase} from "../interfaces/IRedmineIssueAnalysis";
+import type {IRedmineProject} from "../interfaces/IRedmineProject";
 
 interface IAnalyzeIssuesPayload {
     projectId?: number | string;
     dateFrom?: string;
     dateTo?: string;
     statusIds?: Array<number | string>;
+}
+
+interface IAnalyzeIssuePayload {
+    redmineId?: number | string;
+    descriptionOverride?: string;
 }
 
 interface IAnalyzeIssueError {
@@ -32,7 +39,28 @@ interface IAnalyzeIssuesResult {
     errors: IAnalyzeIssueError[];
 }
 
-const RedmineIssueAnalysisPromptSchema = z.object({
+interface IAnalyzeIssueResult {
+    redmineId: number;
+    analysis: IRedmineIssueAnalysis;
+}
+
+interface IAssistIssuePayload {
+    redmineId?: number | string;
+    currentDescription?: string;
+    userInput?: string;
+    analysis?: Partial<IRedmineIssueAnalysis>;
+}
+
+interface IAssistIssueResult {
+    descripcionPropuesta: string;
+    preguntasComentarios: string[];
+    tokens: number;
+    inputTokens: number;
+    outputTokens: number;
+    time: number;
+}
+
+const RedmineIssueBaseAnalysisPromptSchema = z.object({
     resumen: z.string().nullable(),
     categoria: z.enum([
         "nueva_funcionalidad",
@@ -51,6 +79,42 @@ const RedmineIssueAnalysisPromptSchema = z.object({
         "infraestructura",
         "otro"
     ]).nullable(),
+    modulo: z.string().nullable(),
+    objetivo: z.string().nullable(),
+    objetivoPropuesto: z.string().nullable(),
+    moduloPropuesto: z.string().nullable(),
+    valorNegocio: z.enum(["muy_bajo", "bajo", "medio", "alto", "muy_alto"]).nullable(),
+    complejidad: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    nivelUrgencia: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    tipoTrabajoTecnico: z.enum(["frontend", "backend", "fullstack"]).nullable(),
+    rolObjetivo: z.string().nullable(),
+    areaFuncional: z.string().nullable(),
+    seniales: z.array(z.enum([
+        "requerimiento_poco_claro",
+        "cambio_muy_pequenio",
+        "exceso_de_coordinacion",
+        "retrabajo",
+        "operacion_manual",
+        "bajo_impacto_de_negocio",
+        "duplicacion_de_esfuerzo",
+        "dependencia_evita_avance",
+        "analisis_excesivo",
+        "espera_prolongada",
+        "buena_definicion",
+        "mala_definicion",
+        "cambio_de_alcance",
+        "demora_por_dependencia",
+        "gap_de_testing",
+        "resolucion_rapida",
+        "estimacion_desviada",
+        "prioridad_inestable",
+        "falta_de_contexto",
+        "buena_colaboracion",
+        "alto_ida_y_vuelta"
+    ])).nullable(),
+});
+
+const RedmineIssueErrorAnalysisPromptSchema = z.object({
     causaError: z.enum([
         "falla_de_aceptacion",
         "regresion",
@@ -83,63 +147,90 @@ const RedmineIssueAnalysisPromptSchema = z.object({
         "configuracion",
         "infraestructura"
     ]).nullable(),
-    objetivo: z.enum([
-        "nueva_capacidad",
-        "correccion_de_falla",
-        "estabilidad",
-        "reduccion_de_deuda_tecnica",
-        "soporte_operativo",
-        "cumplimiento",
-        "mejora_experiencia_usuario",
-        "reduccion_de_costos",
-        "investigacion",
-        "automatizacion",
-        "escalabilidad",
-        "observabilidad",
-        "otro"
-    ]).nullable(),
-    valorNegocio: z.enum(["muy_bajo", "bajo", "medio", "alto", "muy_alto"]).nullable(),
-    complejidad: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
-    nivelUrgencia: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
     nivelDetectabilidadDesarrollo: z.enum(["muy_baja", "baja", "alta", "muy_alta"]).nullable(),
-    tipoTrabajoTecnico: z.enum(["frontend", "backend", "fullstack"]).nullable(),
-    rolObjetivo: z.string().nullable(),
-    areaFuncional: z.string().nullable(),
-    seniales: z.array(z.enum([
-        "requerimiento_poco_claro",
-        "cambio_muy_pequenio",
-        "exceso_de_coordinacion",
-        "retrabajo",
-        "operacion_manual",
-        "bajo_impacto_de_negocio",
-        "duplicacion_de_esfuerzo",
-        "dependencia_evita_avance",
-        "analisis_excesivo",
-        "espera_prolongada",
-        "buena_definicion",
-        "mala_definicion",
-        "cambio_de_alcance",
-        "demora_por_dependencia",
-        "gap_de_testing",
-        "resolucion_rapida",
-        "estimacion_desviada",
-        "prioridad_inestable",
-        "falta_de_contexto",
-        "buena_colaboracion",
-        "alto_ida_y_vuelta"
-    ])).nullable(),
 });
+
+const RedmineIssueStoryQualityPromptSchema = z.object({
+    calidadCriteriosAceptacion: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    atomicidad: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    ambiguedadDefinicion: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    claridadAlcance: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    testabilidad: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    consistencia: z.enum(["muy_baja", "baja", "media", "alta", "muy_alta"]).nullable(),
+    riesgoErrorQA: z.enum(["muy_bajo", "bajo", "medio", "alto", "muy_alto"]).nullable(),
+    requiereRefinamiento: z.boolean().nullable(),
+    cantidadObjetivosDetectados: z.number().int().min(0).nullable(),
+    hallazgosDefinicion: z.array(z.enum([
+        "sin_criterios_de_aceptacion",
+        "criterios_demasiado_generales",
+        "criterios_no_verificables",
+        "criterios_incompletos",
+        "criterios_bien_definidos",
+        "historia_demasiado_grande",
+        "historia_bien_atomica",
+        "multiples_objetivos_en_un_mismo_ticket",
+        "descripcion_ambigua",
+        "descripcion_incompleta",
+        "alcance_poco_claro",
+        "alcance_bien_delimitado",
+        "falta_contexto_funcional",
+        "dependencia_no_explicitada",
+        "cambio_de_alcance_no_actualizado",
+        "comentarios_contradicen_descripcion",
+        "requiere_definicion_adicional",
+        "facil_de_validar"
+    ])).nullable(),
+    observacionesDefinicion: z.string().nullable(),
+});
+
+const RedmineIssueAssistPromptSchema = z.object({
+    descripcionPropuesta: z.string(),
+    preguntasComentarios: z.array(z.string()),
+});
+
+type IBaseAnalysis = z.infer<typeof RedmineIssueBaseAnalysisPromptSchema>;
+type IErrorAnalysis = z.infer<typeof RedmineIssueErrorAnalysisPromptSchema>;
+type IStoryQualityAnalysis = z.infer<typeof RedmineIssueStoryQualityPromptSchema>;
+type IProjectTaxonomy = {
+    goals: string[];
+    modules: string[];
+};
+
+const ERROR_ANALYSIS_FIELDS = [
+    "causaError",
+    "severidadError",
+    "tipoError",
+    "nivelDetectabilidadDesarrollo",
+] as const;
+
+const STORY_QUALITY_FIELDS = [
+    "calidadCriteriosAceptacion",
+    "atomicidad",
+    "ambiguedadDefinicion",
+    "claridadAlcance",
+    "testabilidad",
+    "consistencia",
+    "riesgoErrorQA",
+    "requiereRefinamiento",
+    "cantidadObjetivosDetectados",
+    "hallazgosDefinicion",
+    "observacionesDefinicion",
+] as const;
 
 class RedmineIssueAnalyzer {
     private readonly issueService = RedmineIssueServiceFactory.instance;
 
     private readonly issueAnalysisService = RedmineIssueAnalysisServiceFactory.instance;
 
+    private readonly projectService = RedmineProjectServiceFactory.instance;
+
     private readonly aiProvider = AiProviderFactory.instance();
 
     private static readonly ERROR_QA_TRACKER_NAME = "Error QA";
 
     private static readonly ERROR_QA_CONTEXT_TRACKER_NAMES = new Set(["Tarea Desarrollo", "User Story"]);
+
+    private static readonly USER_STORY_TRACKER_NAMES = new Set(["User Story"]);
 
     private ensureDateRange(dateFrom?: string, dateTo?: string) {
         if (!dateFrom || !dateTo) {
@@ -325,6 +416,30 @@ class RedmineIssueAnalyzer {
         }).catch(() => null) as Promise<IRedmineIssue | null>;
     }
 
+    private normalizeRequiredRedmineId(redmineId?: number | string) {
+        if (redmineId == null || String(redmineId).trim() === "") {
+            throw new Error("redmineId is required");
+        }
+
+        const normalizedRedmineId = Number(redmineId);
+        if (!Number.isInteger(normalizedRedmineId) || normalizedRedmineId <= 0) {
+            throw new Error("redmineId must be a positive integer");
+        }
+
+        return normalizedRedmineId;
+    }
+
+    private applyDescriptionOverride(issue: IRedmineIssue, descriptionOverride?: string) {
+        if (typeof descriptionOverride !== "string") {
+            return issue;
+        }
+
+        return {
+            ...issue,
+            description: descriptionOverride,
+        };
+    }
+
     private async loadErrorQaContextIssues(issue: IRedmineIssue) {
         if (!this.isErrorQaIssue(issue)) {
             return [];
@@ -377,6 +492,116 @@ class RedmineIssueAnalyzer {
         };
     }
 
+    private normalizeNamedProjectItems(items?: Array<{name: string; description?: string}>) {
+        if (!Array.isArray(items)) {
+            return [];
+        }
+
+        return Array.from(new Set(
+            items
+                .map((item) => item?.name?.trim())
+                .filter((item): item is string => Boolean(item)),
+        ));
+    }
+
+    private async loadProjectTaxonomy(projectRedmineId?: number | null): Promise<IProjectTaxonomy> {
+        if (typeof projectRedmineId !== "number" || Number.isNaN(projectRedmineId)) {
+            return {goals: [], modules: []};
+        }
+
+        const project = await this.projectService.findOne({
+            filters: [
+                {
+                    field: "redmineId",
+                    operator: "eq",
+                    value: projectRedmineId,
+                },
+            ],
+            search: "",
+        }).catch(() => null) as IRedmineProject | null;
+
+        return {
+            goals: this.normalizeNamedProjectItems(project?.goals),
+            modules: this.normalizeNamedProjectItems(project?.modules),
+        };
+    }
+
+    private buildTaxonomyPromptLines(taxonomy: IProjectTaxonomy) {
+        const lines = [
+            "modulo, objetivo, moduloPropuesto y objetivoPropuesto deben estar siempre presentes en el JSON.",
+        ];
+
+        if (taxonomy.modules.length > 0) {
+            lines.push(
+                `Para modulo usa solo uno de estos nombres exactos si hay match claro: ${taxonomy.modules.join(", ")}.`,
+                "Si ningun modulo definido aplica con razon suficiente, devolve modulo = null y completa moduloPropuesto con una etiqueta corta y libre.",
+            );
+        } else {
+            lines.push(
+                "No hay lista predefinida de modulos para el proyecto, asi que modulo puede ser una etiqueta libre y concreta.",
+                "Si modulo ya refleja bien el analisis, devolve moduloPropuesto = null.",
+            );
+        }
+
+        if (taxonomy.goals.length > 0) {
+            lines.push(
+                `Para objetivo usa solo uno de estos nombres exactos si hay match claro: ${taxonomy.goals.join(", ")}.`,
+                "Si ningun objetivo definido aplica con razon suficiente, devolve objetivo = null y completa objetivoPropuesto con una etiqueta corta y libre.",
+            );
+        } else {
+            lines.push(
+                "No hay lista predefinida de objetivos para el proyecto, asi que objetivo puede ser una etiqueta libre y concreta.",
+                "Si objetivo ya refleja bien el analisis, devolve objetivoPropuesto = null.",
+            );
+        }
+
+        lines.push(
+            "No inventes coincidencias forzadas con listas predefinidas.",
+            "Si modulo u objetivo quedan en null, intenta completar su campo Propuesto correspondiente con el mejor texto libre posible.",
+        );
+
+        return lines;
+    }
+
+    private normalizeFreeText(value: string | null | undefined) {
+        if (typeof value !== "string") {
+            return null;
+        }
+
+        const trimmedValue = value.trim();
+        return trimmedValue.length > 0 ? trimmedValue : null;
+    }
+
+    private normalizeBaseAnalysisWithTaxonomy(analysis: IBaseAnalysis, taxonomy: IProjectTaxonomy): IBaseAnalysis {
+        const normalizedAnalysis: IBaseAnalysis = {
+            ...analysis,
+            modulo: this.normalizeFreeText(analysis.modulo),
+            objetivo: this.normalizeFreeText(analysis.objetivo),
+            moduloPropuesto: this.normalizeFreeText(analysis.moduloPropuesto),
+            objetivoPropuesto: this.normalizeFreeText(analysis.objetivoPropuesto),
+        };
+
+        if (taxonomy.modules.length > 0 && normalizedAnalysis.modulo && !taxonomy.modules.includes(normalizedAnalysis.modulo)) {
+            normalizedAnalysis.moduloPropuesto = normalizedAnalysis.moduloPropuesto ?? normalizedAnalysis.modulo;
+            normalizedAnalysis.modulo = null;
+        }
+
+        if (taxonomy.goals.length > 0 && normalizedAnalysis.objetivo && !taxonomy.goals.includes(normalizedAnalysis.objetivo)) {
+            normalizedAnalysis.objetivoPropuesto = normalizedAnalysis.objetivoPropuesto ?? normalizedAnalysis.objetivo;
+            normalizedAnalysis.objetivo = null;
+        }
+
+        if (taxonomy.modules.length === 0 && normalizedAnalysis.modulo) {
+            normalizedAnalysis.moduloPropuesto = null;
+        }
+
+        if (taxonomy.goals.length === 0 && normalizedAnalysis.objetivo) {
+            normalizedAnalysis.objetivoPropuesto = null;
+        }
+
+        return normalizedAnalysis;
+    }
+
     private async loadIssues(filters: IDraxFieldFilter[]) {
         const limit = 100;
         const items: IRedmineIssue[] = [];
@@ -410,14 +635,18 @@ class RedmineIssueAnalyzer {
         return items;
     }
 
-    private async upsertAnalysis(issue: IRedmineIssue, analysis: Omit<IRedmineIssueAnalysisBase, "redmineIssue">) {
+    private async upsertAnalysis(
+        issue: IRedmineIssue,
+        analysis: Omit<IRedmineIssueAnalysisBase, "redmineIssue">,
+        existing?: IRedmineIssueAnalysis | null,
+    ) {
         const payload: IRedmineIssueAnalysisBase = {
             ...analysis,
             redmineIssue: issue._id,
             issue: this.buildIssueSnapshot(issue),
         };
 
-        const existing = await this.issueAnalysisService.findOne({
+        const currentAnalysis = existing ?? await this.issueAnalysisService.findOne({
             filters: [
                 {
                     field: "redmineIssue",
@@ -428,8 +657,8 @@ class RedmineIssueAnalyzer {
             search: "",
         }).catch(() => null);
 
-        if (existing?._id) {
-            await this.issueAnalysisService.update(existing._id, payload);
+        if (currentAnalysis?._id) {
+            await this.issueAnalysisService.update(currentAnalysis._id, payload);
             return "updated" as const;
         }
 
@@ -437,10 +666,57 @@ class RedmineIssueAnalyzer {
         return "created" as const;
     }
 
-    private normalizeAnalysisForPersistence(analysis: z.infer<typeof RedmineIssueAnalysisPromptSchema>): Omit<IRedmineIssueAnalysisBase, "redmineIssue"> {
-        const normalizedEntries = Object.entries(analysis).filter(([, value]) => value !== null);
+    private normalizeAnalysisForPersistence<T extends Record<string, unknown>>(analysis: T) {
+        return analysis as Partial<T>;
+    }
 
-        return Object.fromEntries(normalizedEntries) as Omit<IRedmineIssueAnalysisBase, "redmineIssue">;
+    private clearFields<T extends readonly string[]>(fields: T) {
+        return Object.fromEntries(fields.map((field) => [field, null])) as Record<T[number], null>;
+    }
+
+    private shouldAnalyzeError(issue: IRedmineIssue, baseAnalysis: IBaseAnalysis) {
+        return this.isErrorQaIssue(issue) || baseAnalysis.categoria === "error";
+    }
+
+    private shouldAnalyzeStoryQuality(issue: IRedmineIssue, baseAnalysis: IBaseAnalysis) {
+        const trackerName = issue.tracker?.name ?? "";
+        return RedmineIssueAnalyzer.USER_STORY_TRACKER_NAMES.has(trackerName)
+            || baseAnalysis.categoria === "nueva_funcionalidad"
+            || baseAnalysis.objetivo === "nueva_capacidad";
+    }
+
+    private async executeAnalysisStage<T extends z.ZodTypeAny>(params: {
+        request: CustomRequest;
+        issue: IRedmineIssue;
+        relatedContextIssues?: IRedmineIssue[];
+        systemPromptLines: string[];
+        userPromptLines: string[];
+        schema: T;
+        operationTitle: string;
+    }) {
+        const promptResponse = await this.aiProvider.prompt({
+            systemPrompt: params.systemPromptLines.join("\n"),
+            userInput: [
+                ...params.userPromptLines,
+                "No incluyas el campo redmineIssue porque se completa del lado del servidor.",
+                "Si el campo relatedContextIssues contiene tickets relacionados, usalos solo como contexto para entender el origen del issue principal.",
+                "Ticket:",
+                this.buildIssuePrompt(params.issue, params.relatedContextIssues ?? []),
+            ].join("\n\n"),
+            zodSchema: params.schema,
+            operationTitle: params.operationTitle,
+            operationGroup: "redmine",
+            ip: params.request.ip,
+            userAgent: params.request.headers["user-agent"],
+            tenant: params.request.rbac?.tenantId ?? null,
+            user: params.request.rbac?.userId ?? null,
+        });
+
+        const parsedOutput = this.parseAiOutput(promptResponse.output);
+        return {
+            promptResponse,
+            analysis: params.schema.parse(parsedOutput) as z.infer<T>,
+        };
     }
 
     private parseAiOutput(output: unknown) {
@@ -490,6 +766,174 @@ class RedmineIssueAnalyzer {
         });
     }
 
+    private async analyzeSingleIssue(request: CustomRequest, issue: IRedmineIssue) {
+        const relatedContextIssues = await this.loadErrorQaContextIssues(issue);
+        const projectTaxonomy = await this.loadProjectTaxonomy(issue.project?.id ?? null);
+        const taxonomyPromptLines = this.buildTaxonomyPromptLines(projectTaxonomy);
+
+        const baseStage = await this.executeAnalysisStage({
+            request,
+            issue,
+            relatedContextIssues,
+            schema: RedmineIssueBaseAnalysisPromptSchema,
+            operationTitle: "redmine-issue-analysis-base",
+            systemPromptLines: [
+                "Sos un analista funcional y tecnico especializado en tickets de Redmine.",
+                "Analiza un issue y devolve exclusivamente un JSON valido que respete el schema indicado.",
+                "Esta es la ETAPA 1: clasificacion base del ticket.",
+                "Usa solo la informacion disponible en el ticket.",
+                "Todos los campos del JSON deben estar presentes.",
+                "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
+                "Clasifica el ticket segun resumen, categoria, objetivo, valorNegocio, complejidad, nivelUrgencia, tipoTrabajoTecnico, rolObjetivo, areaFuncional y seniales generales.",
+                ...taxonomyPromptLines,
+                "tipoTrabajoTecnico debe inferir si la resolucion principal parece de frontend, backend o fullstack.",
+                "Responde en espanol neutro y sin texto extra.",
+            ],
+            userPromptLines: [
+                "Genera la clasificacion base del siguiente Redmine issue.",
+            ],
+        });
+
+        const normalizedBaseStageAnalysis = this.normalizeBaseAnalysisWithTaxonomy(baseStage.analysis, projectTaxonomy);
+        const baseAnalysis = this.normalizeAnalysisForPersistence(normalizedBaseStageAnalysis);
+        const shouldAnalyzeError = this.shouldAnalyzeError(issue, normalizedBaseStageAnalysis);
+        const shouldAnalyzeStoryQuality = this.shouldAnalyzeStoryQuality(issue, normalizedBaseStageAnalysis);
+
+        let errorAnalysis: Partial<IErrorAnalysis> = this.clearFields(ERROR_ANALYSIS_FIELDS);
+        if (shouldAnalyzeError) {
+            const errorStage = await this.executeAnalysisStage({
+                request,
+                issue,
+                relatedContextIssues,
+                schema: RedmineIssueErrorAnalysisPromptSchema,
+                operationTitle: "redmine-issue-analysis-error",
+                systemPromptLines: [
+                    "Sos un analista funcional y tecnico especializado en tickets de Redmine.",
+                    "Analiza un issue y devolve exclusivamente un JSON valido que respete el schema indicado.",
+                    "Esta es la ETAPA 2: analisis especifico de error.",
+                    "Usa solo la informacion disponible en el ticket.",
+                    "Todos los campos del JSON deben estar presentes.",
+                    "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
+                    "Aplica esta etapa solo porque el ticket parece error, bug o incidente.",
+                    "causaError debe elegirse solo entre: falla_de_aceptacion, regresion, definicion_incompleta, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario, caso_borde.",
+                    "severidadError debe elegirse solo entre: bloqueante, critico, alto, medio, bajo.",
+                    "tipoError debe elegirse solo entre: funcional, regla_de_negocio, validacion, seguridad, performance, interfaz, integracion, integridad_de_datos, compatibilidad, configuracion, infraestructura.",
+                    "nivelDetectabilidadDesarrollo mide que tan evidente o evitable era el error para desarrollo.",
+                    "Responde en espanol neutro y sin texto extra.",
+                ],
+                userPromptLines: [
+                    "Genera el analisis especifico de error del siguiente Redmine issue.",
+                ],
+            });
+            errorAnalysis = this.normalizeAnalysisForPersistence(errorStage.analysis);
+        }
+
+        let storyQualityAnalysis: Partial<IStoryQualityAnalysis> = this.clearFields(STORY_QUALITY_FIELDS);
+        if (shouldAnalyzeStoryQuality) {
+            const storyStage = await this.executeAnalysisStage({
+                request,
+                issue,
+                relatedContextIssues,
+                schema: RedmineIssueStoryQualityPromptSchema,
+                operationTitle: "redmine-issue-analysis-story-quality",
+                systemPromptLines: [
+                    "Sos un analista funcional especializado en calidad de user stories y definicion funcional.",
+                    "Analiza un issue y devolve exclusivamente un JSON valido que respete el schema indicado.",
+                    "Esta es la ETAPA 3: analisis de calidad de user story o ticket funcional.",
+                    "Usa solo la informacion disponible en el ticket.",
+                    "Todos los campos del JSON deben estar presentes.",
+                    "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
+                    "Evalua calidadCriteriosAceptacion, atomicidad, ambiguedadDefinicion, claridadAlcance, testabilidad, consistencia, riesgoErrorQA, requiereRefinamiento, cantidadObjetivosDetectados, hallazgosDefinicion y observacionesDefinicion.",
+                    "hallazgosDefinicion debe usar solo valores del enum provisto por el schema.",
+                    "cantidadObjetivosDetectados debe ser un entero mayor o igual a 0.",
+                    "requiereRefinamiento debe ser true solo si falta definicion relevante para ejecutar, desarrollar o validar correctamente.",
+                    "Responde en espanol neutro y sin texto extra.",
+                ],
+                userPromptLines: [
+                    "Genera el analisis de calidad de user story del siguiente Redmine issue.",
+                ],
+            });
+            storyQualityAnalysis = this.normalizeAnalysisForPersistence(storyStage.analysis);
+        }
+
+        return {
+            ...baseAnalysis,
+            ...errorAnalysis,
+            ...storyQualityAnalysis,
+        } as Omit<IRedmineIssueAnalysisBase, "redmineIssue">;
+    }
+
+    async analyzeIssue(request: CustomRequest, body: IAnalyzeIssuePayload): Promise<IAnalyzeIssueResult> {
+        const redmineId = this.normalizeRequiredRedmineId(body.redmineId);
+        const originalIssue = await this.findIssueByRedmineId(redmineId);
+
+        if (!originalIssue) {
+            throw new Error(`Redmine issue ${redmineId} was not found`);
+        }
+
+        const issue = this.applyDescriptionOverride(originalIssue, body.descriptionOverride);
+        const analysis = await this.analyzeSingleIssue(request, issue);
+
+        return {
+            redmineId,
+            analysis: {
+                _id: `runtime-${issue.redmineId}-${Date.now()}`,
+                redmineIssue: issue._id,
+                issue: this.buildIssueSnapshot(issue),
+                ...analysis,
+            },
+        };
+    }
+
+    async assistIssue(request: CustomRequest, body: IAssistIssuePayload): Promise<IAssistIssueResult> {
+        const redmineId = this.normalizeRequiredRedmineId(body.redmineId);
+        const issue = await this.findIssueByRedmineId(redmineId);
+
+        if (!issue) {
+            throw new Error(`Redmine issue ${redmineId} was not found`);
+        }
+
+        const promptResponse = await this.aiProvider.prompt({
+            systemPrompt: [
+                "Sos un Analista funcional experto en refinamiento de historias de usuario.",
+                "Tu objetivo es mejorar la redaccion funcional de un ticket Redmine para que sea claro, atomico, testeable y accionable.",
+                "Debes conservar la intencion funcional original y no inventar reglas de negocio no presentes.",
+                "Si falta informacion importante, proponela como preguntas o comentarios concretos.",
+                "Devolve exclusivamente un JSON valido con descripcionPropuesta y preguntasComentarios.",
+                "descripcionPropuesta debe ser una descripcion completa lista para pegar en Redmine.",
+                "preguntasComentarios debe ayudar a una nueva iteracion de refinamiento.",
+                "Responde en espanol neutro.",
+            ].join("\n"),
+            userInput: [
+                "Ticket original:",
+                JSON.stringify(this.buildPromptIssueSnapshot(issue), null, 2),
+                "Analisis funcional disponible:",
+                JSON.stringify(body.analysis ?? null, null, 2),
+                "Descripcion actual a mejorar:",
+                body.currentDescription ?? issue.description ?? "",
+                "Pedido adicional del usuario:",
+                body.userInput ?? "",
+            ].join("\n\n"),
+            zodSchema: RedmineIssueAssistPromptSchema,
+            operationTitle: "redmine-issue-assist-story-description",
+            operationGroup: "redmine",
+            ip: request.ip,
+            userAgent: request.headers["user-agent"],
+            tenant: request.rbac?.tenantId ?? null,
+            user: request.rbac?.userId ?? null,
+        });
+
+        const parsedOutput = RedmineIssueAssistPromptSchema.parse(this.parseAiOutput(promptResponse.output));
+
+        return {
+            ...parsedOutput,
+            tokens: promptResponse.tokens,
+            inputTokens: promptResponse.inputTokens,
+            outputTokens: promptResponse.outputTokens,
+            time: promptResponse.time,
+        };
+    }
+
     async analyzeIssues(request: CustomRequest, body: IAnalyzeIssuesPayload) {
         const {from, to, fromStart, toEnd} = this.ensureDateRange(body.dateFrom, body.dateTo);
 
@@ -502,8 +946,8 @@ class RedmineIssueAnalyzer {
 
         const filters: IDraxFieldFilter[] = [
             {field: "project.id", operator: "eq", value: projectId},
-            {field: "createdOn", operator: "gte", value: fromStart},
-            {field: "createdOn", operator: "lte", value: toEnd},
+            {field: "closedOn", operator: "gte", value: fromStart},
+            {field: "closedOn", operator: "lte", value: toEnd},
         ];
 
         if (statusIds.length > 0) {
@@ -532,47 +976,19 @@ class RedmineIssueAnalyzer {
             let promptResponse: any = null;
 
             try {
-                const relatedContextIssues = await this.loadErrorQaContextIssues(issue);
+                const existingAnalysis = await this.issueAnalysisService.findOne({
+                    filters: [
+                        {
+                            field: "redmineIssue",
+                            operator: "eq",
+                            value: issue._id,
+                        },
+                    ],
+                    search: "",
+                }).catch(() => null) as IRedmineIssueAnalysis | null;
 
-                promptResponse = await this.aiProvider.prompt({
-                    systemPrompt: [
-                        "Sos un analista funcional y tecnico especializado en tickets de Redmine.",
-                        "Analiza un issue y devolve exclusivamente un JSON valido que respete el schema indicado.",
-                        "Usa solo la informacion disponible en el ticket.",
-                        "Todos los campos del JSON deben estar presentes.",
-                        "Si un dato no se puede inferir con razon suficiente, devolvelo como null.",
-                        "Los campos causaError, severidadError y tipoError aplican solo cuando el ticket corresponde a un error o desvio real; si no aplica, devolvelos como null.",
-                        "causaError debe elegirse solo entre: falla_de_aceptacion, regresion, definicion_incompleta, detalle_menor, oportunidad_de_mejora, problema_de_integracion, problema_de_datos, problema_de_entorno, error_de_usuario, caso_borde.",
-                        "Criterios de causaError: falla_de_aceptacion si no cumple criterios definidos; regresion si algo que antes andaba se rompio por cambios recientes; definicion_incompleta si falta criterio esperado; detalle_menor si el impacto es bajo y no impide uso; oportunidad_de_mejora si no es bug pero surge una mejora clara; problema_de_integracion si falla por sistemas externos o APIs; problema_de_datos si hay datos incorrectos o corruptos; problema_de_entorno si depende de configuracion o diferencias entre entornos; error_de_usuario si el comportamiento se explica por mal uso y no por bug; caso_borde si ocurre en un escenario raro no contemplado.",
-                        "severidadError debe elegirse solo entre: bloqueante, critico, alto, medio, bajo.",
-                        "Criterios de severidadError: bloqueante si la funcionalidad queda inutilizable y sin workaround; critico si hay impacto severo en operaciones clave; alto si el problema es importante pero hay workaround o no bloquea por completo; medio si el impacto es moderado; bajo si el impacto es minimo o visual.",
-                        "tipoError debe elegirse solo entre: funcional, regla_de_negocio, validacion, seguridad, performance, interfaz, integracion, integridad_de_datos, compatibilidad, configuracion, infraestructura.",
-                        "Criterios de tipoError: funcional si no cumple la funcionalidad esperada; regla_de_negocio si no respeta reglas del negocio; validacion si fallan reglas de entrada; seguridad si hay riesgo de acceso o exposicion; performance si hay lentitud o ineficiencia; interfaz si afecta UX o presentacion; integracion si falla comunicacion externa; integridad_de_datos si los datos quedan incorrectos o corruptos; compatibilidad si falla en ciertos dispositivos, navegadores o entornos; configuracion si hay parametros mal configurados; infraestructura si el origen es tecnico o de plataforma.",
-                        "nivelDetectabilidadDesarrollo mide que tan evidente o evitable era el error para desarrollo: muy_baja si era muy dificil de detectar sin un caso rebuscado; baja si requeria atencion especial; alta si habia seniales claras; muy_alta si era un error obvio que desarrollo debio detectar.",
-                        "tipoTrabajoTecnico debe inferir si la resolucion principal parece de frontend, backend o fullstack.",
-                        "Responde en espanol neutro y sin texto extra.",
-                    ].join("\n"),
-                    userInput: [
-                        "Genera un analisis estructurado del siguiente Redmine issue.",
-                        "No incluyas el campo redmineIssue porque se completa del lado del servidor.",
-                        "Si el campo relatedContextIssues contiene tickets relacionados, usalos solo como contexto para entender el origen del issue principal.",
-                        "Ticket:",
-                        this.buildIssuePrompt(issue, relatedContextIssues),
-                    ].join("\n\n"),
-                    zodSchema: RedmineIssueAnalysisPromptSchema,
-                    operationTitle: "redmine-issue-analysis",
-                    operationGroup: "redmine",
-                    ip: request.ip,
-                    userAgent: request.headers["user-agent"],
-                    tenant: request.rbac?.tenantId ?? null,
-                    user: request.rbac?.userId ?? null,
-                });
-
-                const parsedOutput = this.parseAiOutput(promptResponse.output);
-                const analysis = this.normalizeAnalysisForPersistence(
-                    RedmineIssueAnalysisPromptSchema.parse(parsedOutput),
-                );
-                const action = await this.upsertAnalysis(issue, analysis);
+                const analysis = await this.analyzeSingleIssue(request, issue);
+                const action = await this.upsertAnalysis(issue, analysis, existingAnalysis);
                 result[action] += 1;
             } catch (error: any) {
                 this.logAnalysisError({
@@ -596,9 +1012,13 @@ class RedmineIssueAnalyzer {
 
 export default RedmineIssueAnalyzer;
 export type {
+    IAnalyzeIssuePayload,
+    IAnalyzeIssueResult,
     IAnalyzeIssueError,
     IAnalyzeIssuesPayload,
     IAnalyzeIssuesResult,
+    IAssistIssuePayload,
+    IAssistIssueResult,
 };
 export {
     RedmineIssueAnalyzer,

@@ -17,6 +17,7 @@ import {BasePermissions} from "../modules/base/permissions/BasePermissions.js";
 import {NotificationPermissions} from "../modules/base/permissions/NotificationPermissions.js";
 import {RedmineIssueAnalysisPermissions} from "../modules/redmine/permissions/RedmineIssueAnalysisPermissions.js";
 import {RedmineIssuePermissions} from "../modules/redmine/permissions/RedmineIssuePermissions.js";
+import {RedmineProjectPermissions} from "../modules/redmine/permissions/RedmineProjectPermissions.js";
 
 
 function InitializePermissions() {
@@ -42,6 +43,7 @@ function InitializePermissions() {
         ...Object.values(NotificationPermissions),
         ...Object.values(RedmineIssueAnalysisPermissions),
         ...Object.values(RedmineIssuePermissions),
+        ...Object.values(RedmineProjectPermissions),
 
     ]
 

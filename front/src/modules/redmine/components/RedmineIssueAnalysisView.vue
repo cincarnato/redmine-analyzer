@@ -12,6 +12,20 @@ const issueDetail = computed(() => {
   return (props.redmineIssueAnalysis?.issue ?? null) as IRedmineIssue | null;
 });
 
+const hasErrorAnalysis = computed(() => {
+  const causaError = props.redmineIssueAnalysis?.causaError?.trim();
+  const severidadError = props.redmineIssueAnalysis?.severidadError?.trim();
+
+  return Boolean(causaError && severidadError);
+});
+
+const hasDefinicionAnalysis = computed(() => {
+  const causaError = props.redmineIssueAnalysis?.calidadCriteriosAceptacion?.trim();
+  const severidadError = props.redmineIssueAnalysis?.atomicidad?.trim();
+
+  return Boolean(causaError && severidadError);
+});
+
 const errorCauseDescriptions: Record<string, string> = {
   falla_de_aceptacion: 'La funcionalidad entregada no cumple con los criterios de aceptación definidos.',
   regresion: 'Una funcionalidad que antes funcionaba correctamente dejó de hacerlo por cambios recientes.',
@@ -128,9 +142,21 @@ const errorAnalysisItems = computed(() => [
 
 const contextAnalysisItems = computed(() => [
   {
+    title: 'Categoría',
+    value: props.redmineIssueAnalysis?.categoria,
+    icon: 'mdi-shape-outline',
+    color: 'primary',
+  },
+  {
     title: 'Objetivo',
     value: props.redmineIssueAnalysis?.objetivo,
     icon: 'mdi-target',
+    color: 'primary',
+  },
+  {
+    title: 'Módulo',
+    value: props.redmineIssueAnalysis?.modulo,
+    icon: 'mdi-view-grid-outline',
     color: 'primary',
   },
   {
@@ -164,6 +190,51 @@ const contextAnalysisItems = computed(() => [
     color: 'primary',
   },
 ]);
+
+const definitionAnalysisItems = computed(() => [
+  {
+    title: 'Calidad Criterios',
+    value: props.redmineIssueAnalysis?.calidadCriteriosAceptacion,
+    icon: 'mdi-format-list-checks',
+    color: 'success',
+  },
+  {
+    title: 'Atomicidad',
+    value: props.redmineIssueAnalysis?.atomicidad,
+    icon: 'mdi-toy-brick-outline',
+    color: 'primary',
+  },
+  {
+    title: 'Ambigüedad',
+    value: props.redmineIssueAnalysis?.ambiguedadDefinicion,
+    icon: 'mdi-chat-question-outline',
+    color: 'warning',
+  },
+  {
+    title: 'Claridad Alcance',
+    value: props.redmineIssueAnalysis?.claridadAlcance,
+    icon: 'mdi-image-filter-center-focus',
+    color: 'info',
+  },
+  {
+    title: 'Testabilidad',
+    value: props.redmineIssueAnalysis?.testabilidad,
+    icon: 'mdi-flask-check-outline',
+    color: 'success',
+  },
+  {
+    title: 'Consistencia',
+    value: props.redmineIssueAnalysis?.consistencia,
+    icon: 'mdi-set-center',
+    color: 'primary',
+  },
+  {
+    title: 'Riesgo Error QA',
+    value: props.redmineIssueAnalysis?.riesgoErrorQA,
+    icon: 'mdi-shield-alert-outline',
+    color: 'error',
+  },
+]);
 </script>
 
 <template>
@@ -189,7 +260,7 @@ const contextAnalysisItems = computed(() => [
     </v-card>
 
     <v-row dense class="compact-row">
-      <v-col cols="12" md="6">
+      <v-col  cols="12">
         <v-card class="mb-4 rounded-lg compact-card h-100" elevation="1" border>
           <v-card-text class="pa-4">
             <div class="d-flex align-center justify-space-between flex-wrap compact-gap-sm mb-4">
@@ -208,6 +279,8 @@ const contextAnalysisItems = computed(() => [
                 :key="item.title"
                 cols="12"
                 sm="6"
+                md="4"
+                lg="3"
               >
                 <v-card
                   variant="outlined"
@@ -221,7 +294,7 @@ const contextAnalysisItems = computed(() => [
                 </v-card>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" md="4" lg="3">
                 <v-card
                   variant="tonal"
                   color="primary"
@@ -246,7 +319,7 @@ const contextAnalysisItems = computed(() => [
                 </v-card>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" md="4" lg="3">
                 <v-card
                   variant="outlined"
                   class="rounded-lg h-100 pa-3 d-flex align-center justify-space-between transition-swing hover-elevate compact-metric-card"
@@ -263,7 +336,7 @@ const contextAnalysisItems = computed(() => [
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="6">
+      <v-col cols="12" v-if="hasErrorAnalysis">
         <v-card class="mb-4 rounded-lg compact-card h-100" elevation="1" border>
           <v-card-text class="pa-4">
             <div class="d-flex align-center justify-space-between flex-wrap compact-gap-sm mb-4">
@@ -328,6 +401,108 @@ const contextAnalysisItems = computed(() => [
                     </div>
                   </div>
                   <v-icon :color="item.color" size="large" class="opacity-30">{{ item.icon }}</v-icon>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" v-if="hasDefinicionAnalysis">
+        <v-card class="rounded-lg compact-card" elevation="1" border>
+          <v-card-text class="pa-4">
+            <div class="d-flex align-center justify-space-between flex-wrap compact-gap-sm mb-4">
+              <div>
+                <div class="metric-label text-medium-emphasis">Definición de Story</div>
+                <div class="section-title font-weight-bold text-high-emphasis">Calidad y criterios de refinamiento</div>
+              </div>
+              <v-chip size="small" color="success" variant="tonal" class="font-weight-bold">
+                Definición
+              </v-chip>
+            </div>
+
+            <v-row dense>
+              <v-col
+                v-for="item in definitionAnalysisItems"
+                :key="item.title"
+                cols="12"
+                sm="6"
+                md="4"
+              >
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate compact-metric-card"
+                >
+                  <div class="pr-4">
+                    <div class="metric-label text-medium-emphasis">{{ item.title }}</div>
+                    <div class="metric-value font-weight-bold">{{ formatEnumLabel(item.value) }}</div>
+                  </div>
+                  <v-icon :color="item.color" size="large" class="opacity-30">{{ item.icon }}</v-icon>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" sm="6" md="4">
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate compact-metric-card"
+                >
+                  <div class="pr-4">
+                    <div class="metric-label text-medium-emphasis">Requiere Refinamiento</div>
+                    <div class="metric-value font-weight-bold">
+                      {{ redmineIssueAnalysis.requiereRefinamiento === undefined ? '-' : (redmineIssueAnalysis.requiereRefinamiento ? 'Sí' : 'No') }}
+                    </div>
+                  </div>
+                  <v-icon color="warning" size="large" class="opacity-30">mdi-file-document-edit-outline</v-icon>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" sm="6" md="4">
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 d-flex align-start justify-space-between transition-swing hover-elevate compact-metric-card"
+                >
+                  <div class="pr-4">
+                    <div class="metric-label text-medium-emphasis">Objetivos Detectados</div>
+                    <div class="metric-value font-weight-bold">{{ redmineIssueAnalysis.cantidadObjetivosDetectados ?? '-' }}</div>
+                  </div>
+                  <v-icon color="primary" size="large" class="opacity-30">mdi-target-variant</v-icon>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-card
+                  variant="tonal"
+                  color="success"
+                  class="rounded-lg pa-4 compact-metric-card h-100"
+                >
+                  <div class="metric-label font-weight-bold mb-2 text-success">Hallazgos</div>
+                  <div class="d-flex flex-wrap compact-gap-xs">
+                    <template v-if="redmineIssueAnalysis.hallazgosDefinicion && redmineIssueAnalysis.hallazgosDefinicion.length">
+                      <v-chip
+                        v-for="hallazgo in redmineIssueAnalysis.hallazgosDefinicion"
+                        :key="hallazgo"
+                        color="success"
+                        variant="outlined"
+                        class="font-weight-bold"
+                        size="small"
+                      >
+                        {{ formatEnumLabel(hallazgo) }}
+                      </v-chip>
+                    </template>
+                    <span v-else class="text-caption font-italic text-success">No hay hallazgos identificados</span>
+                  </div>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-card
+                  variant="outlined"
+                  class="rounded-lg pa-4 h-100"
+                >
+                  <div class="metric-label text-medium-emphasis mb-2">Observaciones</div>
+                  <div class="metric-description text-body-2">
+                    {{ redmineIssueAnalysis.observacionesDefinicion || 'Sin observaciones adicionales.' }}
+                  </div>
                 </v-card>
               </v-col>
             </v-row>

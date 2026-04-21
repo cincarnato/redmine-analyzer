@@ -8,7 +8,10 @@ interface IRedmineIssueAnalysisBase {
     causaError?: string
     severidadError?: string
     tipoError?: string
+    modulo?: string
     objetivo?: string
+    objetivoPropuesto?: string
+    moduloPropuesto?: string
     valorNegocio?: string
     complejidad?: string
     nivelUrgencia?: string
@@ -17,6 +20,17 @@ interface IRedmineIssueAnalysisBase {
     rolObjetivo?: string
     areaFuncional?: string
     seniales?: Array<string>
+    calidadCriteriosAceptacion?: string
+    atomicidad?: string
+    ambiguedadDefinicion?: string
+    claridadAlcance?: string
+    testabilidad?: string
+    consistencia?: string
+    riesgoErrorQA?: string
+    requiereRefinamiento?: boolean
+    cantidadObjetivosDetectados?: number
+    hallazgosDefinicion?: Array<string>
+    observacionesDefinicion?: string
     createdAt?: Date
     updatedAt?: Date
 }
@@ -30,7 +44,10 @@ interface IRedmineIssueAnalysis {
     causaError?: string
     severidadError?: string
     tipoError?: string
+    modulo?: string
     objetivo?: string
+    objetivoPropuesto?: string
+    moduloPropuesto?: string
     valorNegocio?: string
     complejidad?: string
     nivelUrgencia?: string
@@ -39,6 +56,17 @@ interface IRedmineIssueAnalysis {
     rolObjetivo?: string
     areaFuncional?: string
     seniales?: Array<string>
+    calidadCriteriosAceptacion?: string
+    atomicidad?: string
+    ambiguedadDefinicion?: string
+    claridadAlcance?: string
+    testabilidad?: string
+    consistencia?: string
+    riesgoErrorQA?: string
+    requiereRefinamiento?: boolean
+    cantidadObjetivosDetectados?: number
+    hallazgosDefinicion?: Array<string>
+    observacionesDefinicion?: string
     createdAt?: Date
     updatedAt?: Date
 }

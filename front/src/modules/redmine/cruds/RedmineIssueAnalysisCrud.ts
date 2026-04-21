@@ -63,7 +63,10 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
       {title: 'causaError', key: 'causaError', align: 'start'},
       {title: 'severidadError', key: 'severidadError', align: 'start'},
       {title: 'tipoError', key: 'tipoError', align: 'start'},
+      {title: 'modulo', key: 'modulo', align: 'start'},
       {title: 'objetivo', key: 'objetivo', align: 'start'},
+      {title: 'objetivoPropuesto', key: 'objetivoPropuesto', align: 'start'},
+      {title: 'moduloPropuesto', key: 'moduloPropuesto', align: 'start'},
       {title: 'valorNegocio', key: 'valorNegocio', align: 'start'},
       {title: 'complejidad', key: 'complejidad', align: 'start'},
       {title: 'nivelUrgencia', key: 'nivelUrgencia', align: 'start'},
@@ -73,6 +76,17 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
       {title: 'seniales', key: 'seniales', align: 'start'},
       {title: 'areaFuncional', key: 'areaFuncional', align: 'start'},
       {title: 'rolObjetivo', key: 'rolObjetivo', align: 'start'},
+      {title: 'calidadCriteriosAceptacion', key: 'calidadCriteriosAceptacion', align: 'start'},
+      {title: 'atomicidad', key: 'atomicidad', align: 'start'},
+      {title: 'ambiguedadDefinicion', key: 'ambiguedadDefinicion', align: 'start'},
+      {title: 'claridadAlcance', key: 'claridadAlcance', align: 'start'},
+      {title: 'testabilidad', key: 'testabilidad', align: 'start'},
+      {title: 'consistencia', key: 'consistencia', align: 'start'},
+      {title: 'riesgoErrorQA', key: 'riesgoErrorQA', align: 'start'},
+      {title: 'requiereRefinamiento', key: 'requiereRefinamiento', align: 'start'},
+      {title: 'cantidadObjetivosDetectados', key: 'cantidadObjetivosDetectados', align: 'start'},
+      {title: 'hallazgosDefinicion', key: 'hallazgosDefinicion', align: 'start'},
+      {title: 'observacionesDefinicion', key: 'observacionesDefinicion', align: 'start'},
     ]
   }
 
@@ -284,12 +298,32 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         enum: ['funcional', 'regla_de_negocio', 'validacion', 'seguridad', 'performance', 'interfaz', 'integracion', 'integridad_de_datos', 'compatibilidad', 'configuracion', 'infraestructura']
       },
       {
+        name: 'modulo',
+        type: 'string',
+        label: 'modulo',
+        default: '',
+        groupTab: 'Clasificacion'
+      },
+      {
         name: 'objetivo',
-        type: 'enum',
+        type: 'string',
         label: 'objetivo',
-        default: null,
-        groupTab: 'Clasificacion',
-        enum: ['nueva_capacidad', 'correccion_de_falla', 'estabilidad', 'reduccion_de_deuda_tecnica', 'soporte_operativo', 'cumplimiento', 'mejora_experiencia_usuario', 'reduccion_de_costos', 'investigacion', 'automatizacion', 'escalabilidad', 'observabilidad', 'otro']
+        default: '',
+        groupTab: 'Clasificacion'
+      },
+      {
+        name: 'objetivoPropuesto',
+        type: 'string',
+        label: 'objetivoPropuesto',
+        default: '',
+        groupTab: 'Clasificacion'
+      },
+      {
+        name: 'moduloPropuesto',
+        type: 'string',
+        label: 'moduloPropuesto',
+        default: '',
+        groupTab: 'Clasificacion'
       },
       {
         name: 'valorNegocio',
@@ -340,6 +374,110 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
         default: [],
         groupTab: 'Seniales',
         enum: ['requerimiento_poco_claro', 'cambio_muy_pequenio', 'exceso_de_coordinacion', 'retrabajo', 'operacion_manual', 'bajo_impacto_de_negocio', 'duplicacion_de_esfuerzo', 'dependencia_evita_avance', 'analisis_excesivo', 'espera_prolongada', 'buena_definicion', 'mala_definicion', 'cambio_de_alcance', 'demora_por_dependencia', 'gap_de_testing', 'resolucion_rapida', 'estimacion_desviada', 'prioridad_inestable', 'falta_de_contexto', 'buena_colaboracion', 'alto_ida_y_vuelta']
+      },
+      {
+        name: 'calidadCriteriosAceptacion',
+        type: 'enum',
+        label: 'calidadCriteriosAceptacion',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'atomicidad',
+        type: 'enum',
+        label: 'atomicidad',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'ambiguedadDefinicion',
+        type: 'enum',
+        label: 'ambiguedadDefinicion',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'claridadAlcance',
+        type: 'enum',
+        label: 'claridadAlcance',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'testabilidad',
+        type: 'enum',
+        label: 'testabilidad',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'consistencia',
+        type: 'enum',
+        label: 'consistencia',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_baja', 'baja', 'media', 'alta', 'muy_alta']
+      },
+      {
+        name: 'riesgoErrorQA',
+        type: 'enum',
+        label: 'riesgoErrorQA',
+        default: null,
+        groupTab: 'Definicion',
+        enum: ['muy_bajo', 'bajo', 'medio', 'alto', 'muy_alto']
+      },
+      {
+        name: 'requiereRefinamiento',
+        type: 'boolean',
+        label: 'requiereRefinamiento',
+        default: false,
+        groupTab: 'Definicion'
+      },
+      {
+        name: 'cantidadObjetivosDetectados',
+        type: 'number',
+        label: 'cantidadObjetivosDetectados',
+        default: null,
+        groupTab: 'Definicion'
+      },
+      {
+        name: 'hallazgosDefinicion',
+        type: 'array.enum',
+        label: 'hallazgosDefinicion',
+        default: [],
+        groupTab: 'Definicion',
+        enum: [
+          'sin_criterios_de_aceptacion',
+          'criterios_demasiado_generales',
+          'criterios_no_verificables',
+          'criterios_incompletos',
+          'criterios_bien_definidos',
+          'historia_demasiado_grande',
+          'historia_bien_atomica',
+          'multiples_objetivos_en_un_mismo_ticket',
+          'descripcion_ambigua',
+          'descripcion_incompleta',
+          'alcance_poco_claro',
+          'alcance_bien_delimitado',
+          'falta_contexto_funcional',
+          'dependencia_no_explicitada',
+          'cambio_de_alcance_no_actualizado',
+          'comentarios_contradicen_descripcion',
+          'requiere_definicion_adicional',
+          'facil_de_validar'
+        ]
+      },
+      {
+        name: 'observacionesDefinicion',
+        type: 'longString',
+        label: 'observacionesDefinicion',
+        default: '',
+        groupTab: 'Definicion'
       }
     ]
   }
@@ -402,12 +540,12 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
   }
 
   get dialogFullscreen() {
-    return false
+    return true
   }
 
   get tabs() {
     return [
-      'General', 'Clasificacion', 'Seniales'
+      'General', 'Clasificacion', 'Seniales', 'Definicion'
     ]
   }
 
@@ -426,6 +564,7 @@ class RedmineIssueAnalysisCrud extends EntityCrud implements IEntityCrud {
   get dynamicFiltersEnable() {
     return true
   }
+
 
 
 }

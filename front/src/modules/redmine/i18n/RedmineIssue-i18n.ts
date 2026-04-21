@@ -1,7 +1,7 @@
 
 const messages = {
   en: {
-  
+
     redmineissue: {
           entity: 'RedmineIssue',
           menu: 'RedmineIssue',
@@ -56,7 +56,7 @@ const messages = {
      redmineissue: {
           entity: 'RedmineIssue',
           menu: 'RedmineIssue',
-          syncMenu: 'Sincronizar tickets Redmine',
+          syncMenu: 'Sincronizar Redmine',
           crud: 'Gestionar RedmineIssue',
           field:{
                        redmineId:'redmineId',
@@ -105,4 +105,4 @@ const messages = {
   }
 }
 
-export default messages;  
+export default messages;

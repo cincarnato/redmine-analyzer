@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type {IDashboardBase} from "@drax/dashboard-share";
 import {DashboardView} from "@drax/dashboard-vue";
-import {onMounted, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import {VDateInput} from "vuetify/labs/VDateInput";
+import RedmineRemoteProjectCombobox from "../../comboboxes/RedmineRemoteProjectCombobox.vue";
 import {createRedmineIssueDashboard} from "../../dashboards/RedmineIssueAnalysisDashboard";
-import type {IRedmineProjectOption} from "../../interfaces/IRedmineSync";
-import RedmineIssueProvider from "../../providers/RedmineIssueProvider";
 
 type DashboardFilter = NonNullable<IDashboardBase["cards"]>[number]["filters"][number];
 type DateRangeFilter = {
@@ -14,7 +13,6 @@ type DateRangeFilter = {
   value: Date | null;
 };
 
-const provider = RedmineIssueProvider.instance;
 const today = new Date();
 today.setHours(23, 59, 59, 999);
 
@@ -23,26 +21,12 @@ firstDayOfCurrentMonth.setHours(0, 0, 0, 0);
 
 const dashboard = ref<IDashboardBase>(createRedmineIssueDashboard());
 const baseCardFilters = (dashboard.value.cards ?? []).map((card) => [...(card.filters ?? [])]);
-const loadingProjects = ref(false);
-const projects = ref<IRedmineProjectOption[]>([]);
 const selectedProjectIds = ref<Array<number | string>>([]);
 
 const filters = ref<DateRangeFilter[]>([
   {field: "issue.closedOn", operator: "gte", value: firstDayOfCurrentMonth},
   {field: "issue.closedOn", operator: "lte", value: new Date(today)},
 ]);
-
-async function loadProjects(): Promise<void> {
-  loadingProjects.value = true;
-
-  try {
-    projects.value = await provider.fetchProjects();
-  } catch (error) {
-    console.error("Error loading Redmine projects:", error);
-  } finally {
-    loadingProjects.value = false;
-  }
-}
 
 function normalizeStartDate(value: unknown): Date | null {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
@@ -91,29 +75,17 @@ function applyFilters(): void {
 }
 
 watch([filters, selectedProjectIds], applyFilters, {deep: true, immediate: true});
-
-onMounted(async () => {
-  await loadProjects();
-});
 </script>
 
 <template>
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <v-combobox
+        <redmine-remote-project-combobox
           v-model="selectedProjectIds"
-          :items="projects"
-          item-title="name"
-          item-value="id"
-          :return-object="false"
           label="Proyectos"
-          :loading="loadingProjects"
-          :disabled="loadingProjects"
           multiple
-          chips
-          closable-chips
-          clearable
+          :return-object="false"
         />
       </v-col>
       <v-col cols="12" md="6">

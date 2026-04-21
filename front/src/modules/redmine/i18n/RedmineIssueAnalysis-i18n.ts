@@ -30,13 +30,27 @@ const messages = {
            causaError:'Error cause',
            severidadError:'Error severity',
            tipoError:'Error type',
+           modulo:'Module',
            objetivo:'Objective',
+           objetivoPropuesto:'Suggested objective',
+           moduloPropuesto:'Suggested module',
            valorNegocio:'Business value',
            complejidad:'Complexity',
            nivelUrgencia:'Urgency level',
            rolObjetivo:'Target role',
            areaFuncional:'Functional area',
-           seniales:'Signals'
+           seniales:'Signals',
+           calidadCriteriosAceptacion:'Acceptance criteria quality',
+           atomicidad:'Atomicity',
+           ambiguedadDefinicion:'Definition ambiguity',
+           claridadAlcance:'Scope clarity',
+           testabilidad:'Testability',
+           consistencia:'Consistency',
+           riesgoErrorQA:'QA error risk',
+           requiereRefinamiento:'Requires refinement',
+           cantidadObjetivosDetectados:'Detected objectives count',
+           hallazgosDefinicion:'Definition findings',
+           observacionesDefinicion:'Definition observations'
           }
       },
       permission: {
@@ -51,7 +65,7 @@ const messages = {
      redmineissueanalysis: {
           entity: 'Analisis de issue',
           menu: 'Analisis de issues',
-          runMenu: 'Analizar tickets Redmine',
+          runMenu: 'Analizar tickets masivo',
           crud: 'Gestionar analisis de issues',
           field:{
            redmineIssue:'Issue de Redmine',
@@ -76,13 +90,27 @@ const messages = {
            causaError:'Causa del error',
            severidadError:'Severidad del error',
            tipoError:'Tipo de error',
+           modulo:'Modulo',
            objetivo:'Objetivo',
+           objetivoPropuesto:'Objetivo propuesto',
+           moduloPropuesto:'Modulo propuesto',
            valorNegocio:'Valor de negocio',
            complejidad:'Complejidad',
            nivelUrgencia:'Nivel de urgencia',
            rolObjetivo:'Rol objetivo',
            areaFuncional:'Area funcional',
-           seniales:'Seniales'
+           seniales:'Seniales',
+           calidadCriteriosAceptacion:'Calidad criterios aceptacion',
+           atomicidad:'Atomicidad',
+           ambiguedadDefinicion:'Ambiguedad definicion',
+           claridadAlcance:'Claridad alcance',
+           testabilidad:'Testabilidad',
+           consistencia:'Consistencia',
+           riesgoErrorQA:'Riesgo error QA',
+           requiereRefinamiento:'Requiere refinamiento',
+           cantidadObjetivosDetectados:'Cantidad objetivos detectados',
+           hallazgosDefinicion:'Hallazgos definicion',
+           observacionesDefinicion:'Observaciones definicion'
           }
       },
      permission: {

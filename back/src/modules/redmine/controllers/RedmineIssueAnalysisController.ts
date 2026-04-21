@@ -34,6 +34,24 @@ class RedmineIssueAnalysisController extends AbstractFastifyController<IRedmineI
         }
     }
 
+    async analyzeIssue(request: CustomRequest, reply: FastifyReply) {
+        try {
+            request?.rbac.assertAuthenticated();
+            return await this.issueAnalyzer.analyzeIssue(request, request.body ?? {});
+        } catch (e) {
+            this.handleError(e, reply);
+        }
+    }
+
+    async assistIssue(request: CustomRequest, reply: FastifyReply) {
+        try {
+            request?.rbac.assertAuthenticated();
+            return await this.issueAnalyzer.assistIssue(request, request.body ?? {});
+        } catch (e) {
+            this.handleError(e, reply);
+        }
+    }
+
 }
 
 export default RedmineIssueAnalysisController;

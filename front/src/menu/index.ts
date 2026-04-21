@@ -29,12 +29,44 @@ const menu: MenuItem[] = [
         permission: 'redmineissueanalysis:manage'
       },
       {
+        icon: 'mdi-folder-outline',
+        text: 'redmineproject.menu',
+        link: { name: "RedmineProjectCrudPage" },
+        gallery: true,
+        permission: 'redmineproject:manage'
+      },
+
+    ]
+  },
+  {
+    icon: 'mdi-account-circle',
+    text: 'REDMINE Dashboards',
+    gallery: true,
+    permission: 'user:manage',
+    children: [
+
+      {
         icon: 'mdi-view-dashboard',
-        text: 'Dashboard Redmine Analysis',
+        text: 'Dashboard Analysis',
         link: { name: "RedmineIssueAnalysisDashboardPage" },
         gallery: true,
         permission: 'redmineissueanalysis:manage'
       },
+      {
+        icon: 'mdi-view-dashboard',
+        text: 'Dashboard Issues',
+        link: { name: "RedmineIssueDashboardPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      },
+      {
+        icon: 'mdi-view-dashboard',
+        text: 'Dashboard Sprint',
+        link: { name: "RedmineIssueSprintDashboardPage" },
+        gallery: true,
+        permission: 'redmineissue:manage'
+      },
+
       // {
       //   icon: 'mdi-calendar-multiselect',
       //   text: 'Dashboard Redmine Analysis Mensual',
@@ -42,13 +74,7 @@ const menu: MenuItem[] = [
       //   gallery: true,
       //   permission: 'redmineissueanalysis:manage'
       // },
-      {
-        icon: 'mdi-view-dashboard',
-        text: 'Dashboard Redmine Issues',
-        link: { name: "RedmineIssueDashboardPage" },
-        gallery: true,
-        permission: 'redmineissue:manage'
-      },
+
     ]
   },
   {
@@ -57,7 +83,13 @@ const menu: MenuItem[] = [
     gallery: true,
     permission: 'user:manage',
     children: [
-
+      {
+        icon: 'mdi-text-box-edit-outline',
+        text: 'Asistente IA de tickets',
+        link: { name: "RedmineIssueAssistPage" },
+        gallery: true,
+        permission: 'redmineissueanalysis:manage'
+      },
       {
         icon: 'mdi-robot-outline',
         text: 'redmineissueanalysis.runMenu',
@@ -65,6 +97,7 @@ const menu: MenuItem[] = [
         gallery: true,
         permission: 'redmineissueanalysis:manage'
       },
+
       {
         icon: 'mdi-sync',
         text: 'redmineissue.syncMenu',
